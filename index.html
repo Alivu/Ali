@@ -4936,7 +4936,7 @@ function debugEstimateData() {
     const notificationText = `Данные: ${filledRows.length} заполненных из ${estimateData.length} | DOM: ${tableRows.length} строк`;
     showNotification(`Debug: ${notificationText}`);
 }
-// ========== ВИДЖЕТ ЭЛЕКТРОСМЕТА (ИСПРАВЛЕН ОТКРЫТИЕ МЕНЮ) ==========
+// ========== ВИДЖЕТ ЭЛЕКТРОСМЕТА (ИСПРАВЛЕННЫЙ) ==========
 document.addEventListener('DOMContentLoaded', function() {
     if (!document.getElementById('floatingWidget')) return;
     
@@ -4960,11 +4960,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Переменные для управления
     let isDragging = false;
-    let dragStartX, dragStartY, initialLeft, initialTop;
     let touchStartTime = 0;
     let touchStartX = 0, touchStartY = 0;
     let touchMoved = false;
     let dragTimeout = null;
+    let initialLeft = 0, initialTop = 0;
 
     // Инициализация виджета
     function initWidget() {
@@ -4985,12 +4985,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Применение настроек
     function applySettings() {
-        // Прозрачность ТОЛЬКО кнопки виджета
+        // Прозрачность
         widgetButton.style.opacity = widgetSettings.opacity;
-        
-        // Меню всегда непрозрачное
-        widgetMenu.style.opacity = '1';
-        settingsMenu.style.opacity = '1';
         
         // Размер кнопки
         widgetButton.style.width = widgetSettings.buttonSize + 'px';
@@ -5000,51 +4996,305 @@ document.addEventListener('DOMContentLoaded', function() {
         floatingWidget.style.top = widgetSettings.verticalPos + 'px';
         floatingWidget.style.left = widgetSettings.horizontalPos + 'px';
         
-        // Фиксация - меняем только курсор и визуальные эффекты
+        // Фиксация
         if (widgetSettings.isLocked) {
             widgetButton.classList.add('locked');
-            widgetButton.style.cursor = 'pointer'; // Всегда pointer для клика
+            widgetButton.style.cursor = 'pointer';
         } else {
             widgetButton.classList.remove('locked');
-            widgetButton.style.cursor = 'move'; // Для перетаскивания
+            widgetButton.style.cursor = 'move';
         }
         
         // Скрытие
-        if (widgetSettings.isHidden) {
-            floatingWidget.style.display = 'none';
-        } else {
-            floatingWidget.style.display = 'block';
-        }
+        floatingWidget.style.display = widgetSettings.isHidden ? 'none' : 'block';
     }
     
-    // Остальные функции остаются без изменений до setupEventListeners...
+    // Заполнение главного меню
+    function fillMainMenu() {
+        const menuContent = document.querySelector('#widgetMenu .menu-content');
+        if (!menuContent) return;
+        
+        menuContent.innerHTML = `
+            <button class="menu-btn" onclick="quickEstimate()">
+                <i class="fas fa-bolt"></i> Быстрая смета
+            </button>
+            <button class="menu-btn" onclick="openCalculator()">
+                <i class="fas fa-calculator"></i> Калькулятор
+            </button>
+            <button class="menu-btn" onclick="newEstimate()">
+                <i class="fas fa-file-alt"></i> Новая смета
+            </button>
+            <button class="menu-btn" onclick="saveEstimate()">
+                <i class="fas fa-save"></i> Сохранить
+            </button>
+            <button class="menu-btn" onclick="loadEstimate()">
+                <i class="fas fa-folder-open"></i> Загрузить
+            </button>
+            <button class="menu-btn" onclick="printEstimate()">
+                <i class="fas fa-print"></i> Печать
+            </button>
+            <button class="menu-btn" onclick="saveAsPDF()">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <button class="menu-btn" onclick="searchPrice()">
+                <i class="fas fa-search"></i> Поиск в прайсе
+            </button>
+            <button class="menu-btn" onclick="showStats()">
+                <i class="fas fa-chart-bar"></i> Статистика
+            </button>
+            <button class="menu-btn" onclick="showHelp()">
+                <i class="fas fa-question-circle"></i> Помощь
+            </button>
+        `;
+    }
+    
+    // Заполнение меню настроек
+    function fillSettingsMenu() {
+        const menuContent = document.querySelector('#settingsMenu .menu-content');
+        if (!menuContent) return;
+        
+        menuContent.innerHTML = `
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Прозрачность</span>
+                    <span>${Math.round(widgetSettings.opacity * 100)}%</span>
+                </div>
+                <input type="range" class="slider" id="opacitySlider" 
+                       min="0.3" max="1" step="0.1" value="${widgetSettings.opacity}">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Размер кнопки</span>
+                    <span>${widgetSettings.buttonSize}px</span>
+                </div>
+                <input type="range" class="slider" id="sizeSlider" 
+                       min="40" max="80" step="5" value="${widgetSettings.buttonSize}">
+            </div>
+            
+            <div class="pos-controls">
+                <button class="pos-btn" onclick="moveWidget('up')">↑ Вверх</button>
+                <button class="pos-btn" onclick="moveWidget('down')">↓ Вниз</button>
+                <button class="pos-btn" onclick="moveWidget('left')">← Лево</button>
+                <button class="pos-btn" onclick="moveWidget('right')">→ Право</button>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="lockWidget" ${widgetSettings.isLocked ? 'checked' : ''}>
+                <label for="lockWidget">
+                    <i class="fas fa-lock"></i> Зафиксировать виджет
+                </label>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="hideWidget" ${widgetSettings.isHidden ? 'checked' : ''}>
+                <label for="hideWidget">
+                    <i class="fas fa-eye-slash"></i> Скрыть виджет
+                </label>
+            </div>
+            
+            <button class="menu-btn" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i> Темная тема
+            </button>
+            
+            <button class="menu-btn" onclick="refreshApp()">
+                <i class="fas fa-redo"></i> Обновить приложение
+            </button>
+            
+            <button class="menu-btn" onclick="clearBrowserCache()">
+                <i class="fas fa-trash"></i> Очистить кеш
+            </button>
+        `;
+        
+        // Назначаем обработчики слайдеров
+        document.getElementById('opacitySlider')?.addEventListener('input', function(e) {
+            widgetSettings.opacity = parseFloat(e.target.value);
+            widgetButton.style.opacity = widgetSettings.opacity;
+        });
+        
+        document.getElementById('sizeSlider')?.addEventListener('input', function(e) {
+            widgetSettings.buttonSize = parseInt(e.target.value);
+            widgetButton.style.width = widgetSettings.buttonSize + 'px';
+            widgetButton.style.height = widgetSettings.buttonSize + 'px';
+        });
+        
+        document.getElementById('lockWidget')?.addEventListener('change', function(e) {
+            widgetSettings.isLocked = e.target.checked;
+            if (widgetSettings.isLocked) {
+                widgetButton.classList.add('locked');
+                widgetButton.style.cursor = 'pointer';
+            } else {
+                widgetButton.classList.remove('locked');
+                widgetButton.style.cursor = 'move';
+            }
+        });
+        
+        document.getElementById('hideWidget')?.addEventListener('change', function(e) {
+            widgetSettings.isHidden = e.target.checked;
+            floatingWidget.style.display = widgetSettings.isHidden ? 'none' : 'block';
+        });
+    }
     
     // Основные обработчики событий
     function setupEventListeners() {
-        // РАЗДЕЛИМ КЛИК И ПЕРЕТАСКИВАНИЕ
+        // ========== УПРОЩЕННЫЙ ПОДХОД ДЛЯ МОБИЛЬНЫХ ==========
         
-        // ========== ДЛЯ КОМПЬЮТЕРОВ ==========
-        widgetButton.addEventListener('mousedown', handleMouseDown);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+        // Для мобильных: используем только touchend для открытия меню
+        widgetButton.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+            
+            // Сохраняем начальные координаты только для проверки движения
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+            touchMoved = false;
+            
+            // Запоминаем начальную позицию для возможного перетаскивания
+            initialLeft = parseInt(floatingWidget.style.left) || widgetSettings.horizontalPos;
+            initialTop = parseInt(floatingWidget.style.top) || widgetSettings.verticalPos;
+            
+            // Если виджет зафиксирован, не начинаем перетаскивание
+            if (widgetSettings.isLocked) return;
+            
+            // Таймер для начала перетаскивания
+            dragTimeout = setTimeout(() => {
+                if (!touchMoved) {
+                    isDragging = true;
+                    widgetButton.classList.add('dragging');
+                    hideAllMenus();
+                }
+            }, 300);
+        }, { passive: true });
         
-        // Клик для открытия меню - РАБОТАЕТ ДАЖЕ ПРИ ФИКСАЦИИ
-        widgetButton.addEventListener('click', function(e) {
-            // Проверяем, было ли это перетаскивание
-            if (isDragging) {
-                isDragging = false; // Сбрасываем флаг перетаскивания
-                return; // Не открываем меню после перетаскивания
+        widgetButton.addEventListener('touchmove', function(e) {
+            // Если виджет зафиксирован - игнорируем перемещение
+            if (widgetSettings.isLocked) {
+                clearTimeout(dragTimeout);
+                return;
             }
             
-            // Открываем меню в любом случае (даже при фиксации)
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const deltaX = Math.abs(currentX - touchStartX);
+            const deltaY = Math.abs(currentY - touchStartY);
+            
+            // Если палец сдвинулся больше чем на 8px - это перетаскивание
+            if (deltaX > 8 || deltaY > 8) {
+                touchMoved = true;
+                clearTimeout(dragTimeout);
+                
+                // Начинаем перетаскивание если еще не начали
+                if (!isDragging) {
+                    isDragging = true;
+                    widgetButton.classList.add('dragging');
+                    hideAllMenus();
+                }
+                
+                // Обновляем позицию
+                const dx = currentX - touchStartX;
+                const dy = currentY - touchStartY;
+                
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+                
+                // Ограничиваем границы
+                newLeft = Math.max(10, Math.min(window.innerWidth - widgetSettings.buttonSize - 10, newLeft));
+                newTop = Math.max(10, Math.min(window.innerHeight - widgetSettings.buttonSize - 10, newTop));
+                
+                floatingWidget.style.left = newLeft + 'px';
+                floatingWidget.style.top = newTop + 'px';
+                
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        widgetButton.addEventListener('touchend', function(e) {
+            clearTimeout(dragTimeout);
+            
+            if (isDragging) {
+                // Завершаем перетаскивание
+                isDragging = false;
+                widgetButton.classList.remove('dragging');
+                
+                // Сохраняем позицию
+                widgetSettings.horizontalPos = parseInt(floatingWidget.style.left);
+                widgetSettings.verticalPos = parseInt(floatingWidget.style.top);
+                saveSettings();
+                
+                // Не открываем меню после перетаскивания
+                e.stopPropagation();
+                return;
+            }
+            
+            // Проверяем, был ли это короткий тап без перемещения
+            const touchDuration = Date.now() - touchStartTime;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = Math.abs(touchEndX - touchStartX);
+            const deltaY = Math.abs(touchEndY - touchStartY);
+            
+            // Если тап был короткий (менее 300мс) и без значительного перемещения - открываем меню
+            if (touchDuration < 300 && deltaX < 10 && deltaY < 10) {
+                e.stopPropagation();
+                toggleMenu();
+            }
+        });
+        
+        // Для компьютеров: обычные клики
+        widgetButton.addEventListener('click', function(e) {
+            if (isDragging) {
+                isDragging = false;
+                return;
+            }
             e.stopPropagation();
             toggleMenu();
         });
         
-        // ========== ДЛЯ МОБИЛЬНЫХ ==========
-        widgetButton.addEventListener('touchstart', handleTouchStart, { passive: true });
-        widgetButton.addEventListener('touchmove', handleTouchMove, { passive: false });
-        widgetButton.addEventListener('touchend', handleTouchEnd);
+        // Для компьютеров: перетаскивание мышью
+        widgetButton.addEventListener('mousedown', function(e) {
+            if (widgetSettings.isLocked) return;
+            
+            e.preventDefault();
+            isDragging = true;
+            const dragStartX = e.clientX;
+            const dragStartY = e.clientY;
+            initialLeft = parseInt(floatingWidget.style.left) || widgetSettings.horizontalPos;
+            initialTop = parseInt(floatingWidget.style.top) || widgetSettings.verticalPos;
+            
+            widgetButton.classList.add('dragging');
+            hideAllMenus();
+            
+            function handleMouseMove(e) {
+                if (!isDragging) return;
+                
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+                
+                newLeft = Math.max(10, Math.min(window.innerWidth - widgetSettings.buttonSize - 10, newLeft));
+                newTop = Math.max(10, Math.min(window.innerHeight - widgetSettings.buttonSize - 10, newTop));
+                
+                floatingWidget.style.left = newLeft + 'px';
+                floatingWidget.style.top = newTop + 'px';
+            }
+            
+            function handleMouseUp() {
+                isDragging = false;
+                widgetButton.classList.remove('dragging');
+                
+                widgetSettings.horizontalPos = parseInt(floatingWidget.style.left);
+                widgetSettings.verticalPos = parseInt(floatingWidget.style.top);
+                saveSettings();
+                
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
         
         // Кнопка настроек
         settingsBtn.addEventListener('click', function(e) {
@@ -5074,157 +5324,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // ========== ФУНКЦИИ ДЛЯ КОМПЬЮТЕРОВ ==========
-    function handleMouseDown(e) {
-        // Если виджет зафиксирован - не даем перетаскивать
-        if (widgetSettings.isLocked) {
-            isDragging = false; // Гарантируем, что не в режиме перетаскивания
-            return;
-        }
-        
-        e.preventDefault();
-        isDragging = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        initialLeft = parseInt(floatingWidget.style.left) || widgetSettings.horizontalPos;
-        initialTop = parseInt(floatingWidget.style.top) || widgetSettings.verticalPos;
-        
-        widgetButton.classList.add('dragging');
-        hideAllMenus();
-    }
-    
-    function handleMouseMove(e) {
-        // Если виджет зафиксирован или не в режиме перетаскивания - выходим
-        if (!isDragging || widgetSettings.isLocked) return;
-        
-        e.preventDefault();
-        
-        const dx = e.clientX - dragStartX;
-        const dy = e.clientY - dragStartY;
-        
-        let newLeft = initialLeft + dx;
-        let newTop = initialTop + dy;
-        
-        // Ограничиваем границы экрана
-        newLeft = Math.max(10, Math.min(window.innerWidth - widgetSettings.buttonSize - 10, newLeft));
-        newTop = Math.max(10, Math.min(window.innerHeight - widgetSettings.buttonSize - 10, newTop));
-        
-        floatingWidget.style.left = newLeft + 'px';
-        floatingWidget.style.top = newTop + 'px';
-    }
-    
-    function handleMouseUp(e) {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        widgetButton.classList.remove('dragging');
-        
-        // Сохраняем новую позицию
-        widgetSettings.horizontalPos = parseInt(floatingWidget.style.left);
-        widgetSettings.verticalPos = parseInt(floatingWidget.style.top);
-        saveSettings();
-    }
-    
-    // ========== ФУНКЦИИ ДЛЯ МОБИЛЬНЫХ ==========
-    function handleTouchStart(e) {
-        touchStartTime = Date.now();
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        touchMoved = false;
-        
-        initialLeft = parseInt(floatingWidget.style.left) || widgetSettings.horizontalPos;
-        initialTop = parseInt(floatingWidget.style.top) || widgetSettings.verticalPos;
-        
-        // Таймер для определения долгого касания (для перетаскивания)
-        // Но только если виджет НЕ зафиксирован
-        if (!widgetSettings.isLocked) {
-            dragTimeout = setTimeout(() => {
-                if (!touchMoved) {
-                    // Начинаем перетаскивание после 300мс
-                    isDragging = true;
-                    widgetButton.classList.add('dragging');
-                    hideAllMenus();
-                }
-            }, 300);
-        }
-    }
-    
-    function handleTouchMove(e) {
-        // Если виджет зафиксирован - не даем перетаскивать
-        if (widgetSettings.isLocked) {
-            clearTimeout(dragTimeout);
-            return;
-        }
-        
-        const currentX = e.touches[0].clientX;
-        const currentY = e.touches[0].clientY;
-        const deltaX = Math.abs(currentX - touchStartX);
-        const deltaY = Math.abs(currentY - touchStartY);
-        
-        // Если переместили палец больше чем на 5px, это перетаскивание
-        if (deltaX > 5 || deltaY > 5) {
-            touchMoved = true;
-            
-            // Отменяем таймер клика
-            clearTimeout(dragTimeout);
-            
-            // Если еще не начали перетаскивать, начинаем
-            if (!isDragging) {
-                isDragging = true;
-                widgetButton.classList.add('dragging');
-                hideAllMenus();
-            }
-            
-            // Перетаскиваем
-            e.preventDefault();
-            
-            const dx = currentX - touchStartX;
-            const dy = currentY - touchStartY;
-            
-            let newLeft = initialLeft + dx;
-            let newTop = initialTop + dy;
-            
-            // Ограничиваем границы экрана
-            newLeft = Math.max(10, Math.min(window.innerWidth - widgetSettings.buttonSize - 10, newLeft));
-            newTop = Math.max(10, Math.min(window.innerHeight - widgetSettings.buttonSize - 10, newTop));
-            
-            floatingWidget.style.left = newLeft + 'px';
-            floatingWidget.style.top = newTop + 'px';
-        }
-    }
-    
-    function handleTouchEnd(e) {
-        clearTimeout(dragTimeout);
-        
-        if (isDragging) {
-            // Завершаем перетаскивание
-            isDragging = false;
-            widgetButton.classList.remove('dragging');
-            
-            // Сохраняем позицию
-            widgetSettings.horizontalPos = parseInt(floatingWidget.style.left);
-            widgetSettings.verticalPos = parseInt(floatingWidget.style.top);
-            saveSettings();
-            
-            // Предотвращаем открытие меню после перетаскивания
-            e.preventDefault();
-            return;
-        }
-        
-        // Если это был короткий тап (не перетаскивание) - открываем меню
-        const touchDuration = Date.now() - touchStartTime;
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-        const deltaX = Math.abs(touchEndX - touchStartX);
-        const deltaY = Math.abs(touchEndY - touchStartY);
-        
-        // Открываем меню даже при фиксации виджета
-        if (touchDuration < 300 && deltaX < 10 && deltaY < 10) {
-            e.stopPropagation();
-            toggleMenu();
-        }
-    }
-    
     // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
     function toggleMenu() {
         if (widgetMenu.style.display === 'block') {
@@ -5245,57 +5344,88 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('widgetSettings', JSON.stringify(widgetSettings));
     }
     
-    // Функции кнопок главного меню (остаются такими же)
-    function quickEstimate() {
-        showTab('estimate');
-        addEmptyRow();
-        showNotification('Быстрая смета: добавлена пустая строка');
+    // Функция перемещения виджета
+    function moveWidget(direction) {
+        const step = 10;
+        switch(direction) {
+            case 'up':
+                widgetSettings.verticalPos = Math.max(10, widgetSettings.verticalPos - step);
+                break;
+            case 'down':
+                widgetSettings.verticalPos = Math.min(window.innerHeight - widgetSettings.buttonSize - 10, 
+                                                      widgetSettings.verticalPos + step);
+                break;
+            case 'left':
+                widgetSettings.horizontalPos = Math.max(10, widgetSettings.horizontalPos - step);
+                break;
+            case 'right':
+                widgetSettings.horizontalPos = Math.min(window.innerWidth - widgetSettings.buttonSize - 10, 
+                                                        widgetSettings.horizontalPos + step);
+                break;
+        }
+        applySettings();
+        saveSettings();
     }
     
-    function openCalculator() {
+    // Глобальные функции для кнопок меню
+    window.quickEstimate = function() {
+        window.showTab && window.showTab('estimate');
+        window.addEmptyRow && window.addEmptyRow();
+        window.showNotification && window.showNotification('Быстрая смета: добавлена пустая строка');
+        hideAllMenus();
+    };
+    
+    window.openCalculator = function() {
         const expression = prompt('Введите выражение для расчета (например: 1500*2+500):', '');
         if (expression) {
             try {
                 const result = Function('"use strict"; return (' + expression + ')')();
-                alert(`Результат: ${expression} = ${formatCurrency(result)} руб.`);
+                alert(`Результат: ${expression} = ${window.formatCurrency ? window.formatCurrency(result) : result} руб.`);
             } catch (error) {
                 alert('Ошибка в выражении!');
             }
         }
-    }
+        hideAllMenus();
+    };
     
-    function newEstimate() {
+    window.newEstimate = function() {
         if (confirm('Создать новую смету? Текущая несохраненная будет потеряна.')) {
-            clearEstimate();
-            showTab('estimate');
+            window.clearEstimate && window.clearEstimate();
+            window.showTab && window.showTab('estimate');
         }
-    }
+        hideAllMenus();
+    };
     
-    function saveEstimate() {
+    window.saveEstimate = function() {
         window.saveEstimate && window.saveEstimate();
-    }
+        hideAllMenus();
+    };
     
-    function loadEstimate() {
+    window.loadEstimate = function() {
         window.showLoadModal && window.showLoadModal();
-    }
+        hideAllMenus();
+    };
     
-    function printEstimate() {
+    window.printEstimate = function() {
         window.showPrintModal && window.showPrintModal();
-    }
+        hideAllMenus();
+    };
     
-    function saveAsPDF() {
+    window.saveAsPDF = function() {
         window.saveAsPDF && window.saveAsPDF();
-    }
+        hideAllMenus();
+    };
     
-    function searchPrice() {
-        showTab('price');
+    window.searchPrice = function() {
+        window.showTab && window.showTab('price');
         const searchInput = document.getElementById('priceSearch');
         if (searchInput) {
-            searchInput.focus();
+            setTimeout(() => searchInput.focus(), 300);
         }
-    }
+        hideAllMenus();
+    };
     
-    function showStats() {
+    window.showStats = function() {
         const filledRows = window.estimateData ? window.estimateData.filter(row => 
             row.priceId || row.name.trim() !== '' || row.isMaterial
         ).length : 0;
@@ -5305,12 +5435,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         alert(`📊 Статистика сметы:\n\n` +
               `• Заполненных строк: ${filledRows}\n` +
-              `• Общая сумма: ${formatCurrency(totalAmount)} руб.\n` +
+              `• Общая сумма: ${window.formatCurrency ? window.formatCurrency(totalAmount) : totalAmount} руб.\n` +
               `• Сохраненных смет: ${window.savedEstimates ? window.savedEstimates.length : 0}\n` +
               `• Позиций в прайсе: ${window.priceData ? window.priceData.reduce((sum, section) => sum + section.items.length, 0) : 0}`);
-    }
+        hideAllMenus();
+    };
     
-    function showHelp() {
+    window.showHelp = function() {
         alert('💡 Помощь по ЭлектроСмета:\n\n' +
               '1. Прайс-лист - выбор работ из базы\n' +
               '2. Смета - формирование итогового расчета\n' +
@@ -5318,36 +5449,21 @@ document.addEventListener('DOMContentLoaded', function() {
               '4. PDF/Печать - экспорт результатов\n' +
               '5. Виджет - быстрый доступ к функциям\n\n' +
               'Сайт разработчика: https://alivu.github.io/');
-    }
+        hideAllMenus();
+    };
     
-    function toggleTheme() {
+    window.toggleTheme = function() {
         const isDark = document.body.classList.toggle('dark-theme');
         localStorage.setItem('darkTheme', isDark);
-        showNotification(isDark ? 'Темная тема включена' : 'Темная тема выключена');
-        
-        if (isDark) {
-            const style = document.createElement('style');
-            style.id = 'dark-theme-styles';
-            style.textContent = `
-                body { background: #1a1a1a; color: #fff; }
-                .container { background: #2d2d2d; }
-                .tab-content { background: #333; }
-                .price-section { background: #2d2d2d; }
-                .estimate-table { background: #333; color: #fff; }
-                input, select, textarea { background: #444; color: #fff; border-color: #555; }
-            `;
-            document.head.appendChild(style);
-        } else {
-            const style = document.getElementById('dark-theme-styles');
-            if (style) style.remove();
-        }
-    }
+        window.showNotification && window.showNotification(isDark ? 'Темная тема включена' : 'Темная тема выключена');
+        hideAllMenus();
+    };
     
-    function refreshApp() {
+    window.refreshApp = function() {
         location.reload();
-    }
+    };
     
-    function clearBrowserCache() {
+    window.clearBrowserCache = function() {
         if (confirm('⚠️ Очистить кеш браузера?\n\nСохраните важные сметы перед очисткой!')) {
             const tempEstimates = JSON.parse(localStorage.getItem('electroEstimates')) || [];
             const tempSettings = JSON.parse(localStorage.getItem('widgetSettings'));
@@ -5368,22 +5484,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('widgetSettings', JSON.stringify(tempSettings));
             }
             
-            showNotification('✅ Кеш браузера очищен! Сметы сохранены.');
+            window.showNotification && window.showNotification('✅ Кеш браузера очищен! Сметы сохранены.');
             setTimeout(() => location.reload(), 1000);
         }
-    }
+        hideAllMenus();
+    };
     
-    function formatCurrency(amount) {
-        if (isNaN(amount)) return '0';
-        return new Intl.NumberFormat('ru-RU').format(parseFloat(amount).toFixed(2));
-    }
+    window.moveWidget = moveWidget;
     
     // Запускаем инициализацию
     initWidget();
     
     // Адаптация при изменении размера окна
     window.addEventListener('resize', function() {
-        // Не даем виджету выйти за границы экрана
         const maxLeft = window.innerWidth - widgetSettings.buttonSize - 10;
         const maxTop = window.innerHeight - widgetSettings.buttonSize - 10;
         
@@ -5396,9 +5509,9 @@ document.addEventListener('DOMContentLoaded', function() {
             widgetSettings.verticalPos = maxTop;
             floatingWidget.style.top = maxTop + 'px';
         }
+        saveSettings();
     });
 });
-// ========== КОНЕЦ ВИДЖЕТА ==========
 		
     </script>
 </body>
