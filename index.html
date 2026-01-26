@@ -1360,12 +1360,19 @@ case 'breaker':
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-cable"></i> Сечение кабеля (опционально):</label>
-                            <select id="currentCable">
-                                <option value="">Не учитывать</option>
-                                <option value="1.5">1.5 мм²</option>
-                                <option value="2.5">2.5 мм²</option>
-                                <option value="4">4 мм²</option>
-                            </select>
+<select id="currentCable">
+    <option value="">Не учитывать</option>
+    <option value="1.5">1.5 мм²</option>
+    <option value="2.5">2.5 мм²</option>
+    <option value="4">4 мм²</option>
+    <option value="6">6 мм²</option>
+    <option value="10">10 мм²</option>
+    <option value="16">16 мм²</option>
+    <option value="25">25 мм²</option>
+    <option value="35">35 мм²</option>
+    <option value="50">50 мм²</option>
+    <option value="70">70 мм²</option>
+</select>
                         </div>
                     `;
                     break;
@@ -1383,12 +1390,18 @@ case 'breaker':
                         <div class="input-group">
                             <div class="form-group">
                                 <label><i class="fas fa-cable"></i> Сечение (мм²):</label>
-                                <select id="voltageCable">
-                                    <option value="1.5">1.5</option>
-                                    <option value="2.5">2.5</option>
-                                    <option value="4">4</option>
-                                    <option value="6">6</option>
-                                </select>
+<select id="voltageCable">
+    <option value="1.5">1.5</option>
+    <option value="2.5">2.5</option>
+    <option value="4">4</option>
+    <option value="6">6</option>
+    <option value="10">10</option>
+    <option value="16">16</option>
+    <option value="25">25</option>
+    <option value="35">35</option>
+    <option value="50">50</option>
+    <option value="70">70</option>
+</select>
                             </div>
                             <div class="form-group">
                                 <label><i class="fas fa-atom"></i> Материал:</label>
@@ -1472,12 +1485,18 @@ case 'breaker':
                         <div class="input-group">
                             <div class="form-group">
                                 <label><i class="fas fa-cable"></i> Сечение (мм²):</label>
-                                <select id="lengthCable">
-                                    <option value="1.5">1.5</option>
-                                    <option value="2.5">2.5</option>
-                                    <option value="4">4</option>
-                                    <option value="6">6</option>
-                                </select>
+<select id="lengthCable">
+    <option value="1.5">1.5</option>
+    <option value="2.5">2.5</option>
+    <option value="4">4</option>
+    <option value="6">6</option>
+    <option value="10">10</option>
+    <option value="16">16</option>
+    <option value="25">25</option>
+    <option value="35">35</option>
+    <option value="50">50</option>
+    <option value="70">70</option>
+</select>
                             </div>
                             <div class="form-group">
                                 <label><i class="fas fa-atom"></i> Материал:</label>
@@ -2055,37 +2074,69 @@ function calculateBreaker() {
                 </div>
             `;
             
-            // Рекомендации по кабелю
-            if (current <= 16) {
-                html += `<div class="result-item info">
-                    <strong>Рекомендуемое сечение кабеля (медь):</strong> 1.5-2.5 мм²
-                </div>`;
-            } else if (current <= 25) {
-                html += `<div class="result-item info">
-                    <strong>Рекомендуемое сечение кабеля (медь):</strong> 2.5-4 мм²
-                </div>`;
-            } else if (current <= 35) {
-                html += `<div class="result-item info">
-                    <strong>Рекомендуемое сечение кабеля (медь):</strong> 4-6 мм²
-                </div>`;
-            }
-            
-            // Проверка выбранного кабеля
-            if (cableSection) {
-                const cableCurrents = {1.5: 16, 2.5: 25, 4: 32};
-                const maxCurrent = cableCurrents[cableSection] || 0;
-                if (maxCurrent > 0) {
-                    if (current > maxCurrent) {
-                        html += `<div class="result-item danger">
-                            <strong>⚠️ Кабель ${cableSection} мм² не подходит!</strong> Макс. ${maxCurrent}А
-                        </div>`;
-                    } else {
-                        html += `<div class="result-item success">
-                            <strong>✅ Кабель ${cableSection} мм² подходит</strong> (макс. ${maxCurrent}А)
-                        </div>`;
-                    }
-                }
-            }
+// Полная таблица токов для кабелей (медь, открытая прокладка)
+const cableCurrents = {
+    1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
+    16: 63, 25: 80, 35: 100, 50: 125, 70: 160
+};
+
+// Рекомендации по кабелю
+let recommendedCable = '';
+if (current <= 16) {
+    recommendedCable = '1.5-2.5 мм² (медь)';
+} else if (current <= 25) {
+    recommendedCable = '2.5-4 мм² (медь)';
+} else if (current <= 32) {
+    recommendedCable = '4-6 мм² (медь)';
+} else if (current <= 40) {
+    recommendedCable = '6-10 мм² (медь)';
+} else if (current <= 50) {
+    recommendedCable = '10 мм² (медь)';
+} else if (current <= 63) {
+    recommendedCable = '10-16 мм² (медь)';
+} else if (current <= 80) {
+    recommendedCable = '16-25 мм² (медь)';
+} else if (current <= 100) {
+    recommendedCable = '25-35 мм² (медь)';
+} else if (current <= 125) {
+    recommendedCable = '35-50 мм² (медь)';
+} else if (current <= 160) {
+    recommendedCable = '50-70 мм² (медь)';
+} else {
+    recommendedCable = '70+ мм² (медь) или несколько линий';
+}
+
+html += `<div class="result-item info">
+    <strong>Рекомендуемое сечение кабеля (медь, открытая):</strong> ${recommendedCable}
+</div>`;
+
+// Проверка выбранного кабеля
+if (cableSection) {
+    const maxCurrent = cableCurrents[cableSection] || 0;
+    if (maxCurrent > 0) {
+        const safetyMargin = maxCurrent * 0.9; // 10% запас
+        
+        if (current > safetyMargin) {
+            html += `<div class="result-item ${current > maxCurrent ? 'danger' : 'warning'}">
+                <strong>${current > maxCurrent ? '⚠️ ОПАСНО!' : '⚠️ Внимание!'}</strong> 
+                Кабель ${cableSection} мм² ${current > maxCurrent ? 'не подходит!' : 'близок к пределу!'}<br>
+                Макс. ток: ${maxCurrent}А (рекомендуемый запас: ${safetyMargin.toFixed(1)}А)
+            </div>`;
+        } else {
+            html += `<div class="result-item success">
+                <strong>✅ Кабель ${cableSection} мм² подходит</strong><br>
+                Макс. ток: ${maxCurrent}А (запас ${(safetyMargin - current).toFixed(1)}А)
+            </div>`;
+        }
+    }
+}
+
+// Для больших токов - рекомендация по фазности
+if (current > 100 && voltage === 220) {
+    html += `<div class="result-item warning">
+        <strong>Рекомендация:</strong> Для мощности ${power} кВт рекомендуется 380В (3 фазы)
+    </div>`;
+}
             
             return html;
         }
@@ -2160,6 +2211,39 @@ if (voltageDropPercent > 5) {
         <strong>⚠️ Близко к пределу.</strong> Рекомендуется сечение ${recommendedSection} мм²
     </div>`;
 }
+
+// Максимальные токи для кабелей (для информации)
+const cableCurrents = {
+    copper: {
+        1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
+        16: 63, 25: 80, 35: 100, 50: 125, 70: 160
+    },
+    aluminum: {
+        1.5: 12, 2.5: 19, 4: 25, 6: 32, 10: 40,
+        16: 50, 25: 65, 35: 80, 50: 100, 70: 125
+    }
+};
+
+const maxCurrent = cableCurrents[material][cableSection] || 160;
+const currentPercent = (current / maxCurrent) * 100;
+
+let html = `
+    <div class="result-item">
+        <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А (${currentPercent.toFixed(1)}% от макс.)
+    </div>
+    <div class="result-item">
+        <strong>Начальное напряжение:</strong> ${startVoltage} В
+    </div>
+    <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}">
+        <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
+    </div>
+    <div class="result-item">
+        <strong>Конечное напряжение:</strong> ${endVoltage.toFixed(1)} В
+    </div>
+    <div class="result-item">
+        <strong>Кабель:</strong> ${cableSection} мм² ${material} (макс. ${maxCurrent}А)
+    </div>
+`;
             
             return html;
         }
