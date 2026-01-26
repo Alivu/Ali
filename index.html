@@ -14,7 +14,78 @@
 <meta name="apple-mobile-web-app-title" content="Электро-Калькулятор">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Alivu/alivu.github.io/main/Icon/icon-180x180.png">
     <style>
+/* PWA Стили */
+.pwa-mode .container {
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+}
 
+.pwa-mode body {
+    padding: 0;
+}
+
+/* Кнопка установки */
+.float-btn.install {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+    }
+}
+
+/* Оффлайн уведомление */
+.offline-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ff9800;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    z-index: 10001;
+    display: none;
+    font-weight: bold;
+}
+
+/* Оффлайн режим */
+body.offline .offline-notification {
+    display: block;
+}
+
+body.offline .container::before {
+    content: '⚡';
+    position: fixed;
+    top: 50px;
+    right: 15px;
+    background: #4caf50;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    z-index: 10000;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
 
 /* Модальное окно предупреждения */
 .warning-modal {
@@ -1009,6 +1080,11 @@ body.dark-theme .form-actions {
     </style>
 </head>
 <body>
+<!-- Оффлайн уведомление -->
+<div class="offline-notification" id="offlineNotification">
+    ⚡ Работаем без интернета
+</div>
+    
     <div class="container">
         <!-- Шапка -->
         <header class="header">
@@ -1191,14 +1267,17 @@ body.dark-theme .form-actions {
     </div>
     
     <!-- Плавающие кнопки -->
-    <div class="bottom-buttons">
-        <button class="float-btn refresh" onclick="location.reload()" title="Обновить">
-            <i class="fas fa-redo"></i>
-        </button>
-        <button class="float-btn back" onclick="goBack()" title="Назад">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-    </div>
+<div class="bottom-buttons">
+    <button class="float-btn install" onclick="installPWA()" title="Установить приложение" id="installButton" style="display: none;">
+        <i class="fas fa-download"></i>
+    </button>
+    <button class="float-btn refresh" onclick="location.reload()" title="Обновить">
+        <i class="fas fa-redo"></i>
+    </button>
+    <button class="float-btn back" onclick="goBack()" title="Назад">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+</div>
 
 
     <!-- Модальное окно предупреждения -->
@@ -3723,7 +3802,113 @@ function calculateProCurrent() {
         }
     }
 }
+
+
+// ========== PWA УСТАНОВКА ==========
+let deferredPrompt;
+const installButton = document.getElementById('installButton');
+
+// Показываем кнопку установки при необходимости
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Предотвращаем автоматическое отображение подсказки
+    e.preventDefault();
+    // Сохраняем событие для использования позже
+    deferredPrompt = e;
+    // Показываем кнопку установки
+    installButton.style.display = 'flex';
+    
+    // Показываем уведомление
+    showNotification('Установите приложение для работы оффлайн!', 'info');
+});
+
+// Обработчик установки
+function installPWA() {
+    if (!deferredPrompt) return;
+    
+    // Показываем запрос на установку
+    deferredPrompt.prompt();
+    
+    // Ждем ответа пользователя
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('Пользователь принял установку');
+            showNotification('Приложение успешно установлено!', 'success');
+        } else {
+            console.log('Пользователь отклонил установку');
+        }
+        
+        // Сбрасываем переменную
+        deferredPrompt = null;
+        
+        // Скрываем кнопку
+        installButton.style.display = 'none';
+    });
+}
+
+// Скрываем кнопку после установки
+window.addEventListener('appinstalled', (evt) => {
+    console.log('Приложение установлено');
+    installButton.style.display = 'none';
+    deferredPrompt = null;
+    
+    // Показываем сообщение об успешной установке
+    setTimeout(() => {
+        showNotification('Приложение установлено! Теперь работает оффлайн.', 'success');
+    }, 1000);
+});
+
+// Проверяем статус установки
+function checkInstallStatus() {
+    // Проверяем, запущено ли приложение в режиме standalone
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('Запущено как PWA');
+        document.body.classList.add('pwa-mode');
+        installButton.style.display = 'none';
+    }
+    
+    // Проверяем iOS standalone
+    if (window.navigator.standalone === true) {
+        console.log('Запущено как PWA на iOS');
+        document.body.classList.add('pwa-mode');
+        installButton.style.display = 'none';
+    }
+}
+
+// Проверяем при загрузке
+document.addEventListener('DOMContentLoaded', checkInstallStatus);
         
     </script>
+// Регистрируем Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js')
+            .then(function(registration) {
+                console.log('ServiceWorker зарегистрирован: ', registration.scope);
+                
+                // Показываем уведомление об установке
+                if (!localStorage.getItem('pwaInstalled')) {
+                    setTimeout(() => {
+                        showNotification('Приложение готово к работе оффлайн!', 'success');
+                        localStorage.setItem('pwaInstalled', 'true');
+                    }, 3000);
+                }
+            })
+            .catch(function(err) {
+                console.log('Ошибка регистрации ServiceWorker: ', err);
+            });
+    });
+}
+
+// Проверяем, установлено ли приложение
+function checkPWAInstall() {
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true) {
+        document.body.classList.add('pwa-installed');
+    }
+}
+
+// Вызываем проверку при загрузке
+document.addEventListener('DOMContentLoaded', checkPWAInstall);
+    
 </body>
 </html>
