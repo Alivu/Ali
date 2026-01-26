@@ -1312,117 +1312,253 @@ body.dark-theme .checkbox-group label {
             `;
         }
         
-        // ========== ОБЫЧНЫЙ КАЛЬКУЛЯТОР ==========
-        function appendToCalc(value) {
-            if (['+', '-', '*', '/'].includes(value)) {
-                if (calcValue === '0' && calcHistory === '') return;
-                
-                if (calcHistory && !calcHistory.endsWith(' ')) {
-                    calcHistory += ' ' + value + ' ';
-                } else {
-                    calcHistory = calcValue + ' ' + value + ' ';
-                }
-                
-                document.getElementById('calcHistory').textContent = calcHistory;
-                calcValue = '0';
-                lastOperation = value;
-                updateDisplay();
-                return;
+// ========== ОБЫЧНЫЙ КАЛЬКУЛЯТОР ==========
+let calcHistory = '';
+let calcValue = '0';
+let lastOperation = '';
+let waitingForOperand = false;
+
+function appendToCalc(value) {
+    if (['+', '-', '*', '/'].includes(value)) {
+        // Если это операция и мы уже вводим число, сохраняем его
+        if (calcHistory && calcHistory !== '0' && !waitingForOperand) {
+            // Добавляем текущее значение к истории
+            calcHistory += ' ' + calcValue + ' ' + value;
+        } else if (calcHistory === '' && calcValue !== '0') {
+            // Начинаем новое вычисление
+            calcHistory = calcValue + ' ' + value;
+        } else if (calcHistory.includes('=')) {
+            // Продолжаем с результата предыдущего вычисления
+            const parts = calcHistory.split('=');
+            if (parts.length > 1) {
+                calcHistory = parts[1].trim() + ' ' + value;
             }
-            
-            if (value === '.') {
-                if (calcValue.includes('.')) return;
-                calcValue += value;
-                updateDisplay();
-                return;
-            }
-            
-            if (calcValue === '0' || lastOperation) {
-                calcValue = value;
-                lastOperation = '';
-            } else {
-                calcValue += value;
-            }
-            
-            updateDisplay();
+        } else {
+            // Просто добавляем операцию
+            calcHistory = calcValue + ' ' + value;
         }
         
-        function clearCalc() {
-            calcHistory = '';
-            calcValue = '0';
-            lastOperation = '';
-            updateDisplay();
-            document.getElementById('calcHistory').textContent = '';
+        document.getElementById('calcHistory').textContent = calcHistory;
+        waitingForOperand = true;
+        lastOperation = value;
+        return;
+    }
+    
+    if (value === '.') {
+        if (calcValue.includes('.')) return;
+        if (calcValue === '0' || waitingForOperand) {
+            calcValue = '0.';
+        } else {
+            calcValue += '.';
         }
+        waitingForOperand = false;
+        updateDisplay();
+        return;
+    }
+    
+    if (calcValue === '0' || waitingForOperand) {
+        calcValue = value;
+        waitingForOperand = false;
+    } else {
+        calcValue += value;
+    }
+    
+    updateDisplay();
+}
+
+function clearCalc() {
+    calcHistory = '';
+    calcValue = '0';
+    waitingForOperand = false;
+    lastOperation = '';
+    updateDisplay();
+    document.getElementById('calcHistory').textContent = '';
+}
+
+function backspaceCalc() {
+    if (calcValue.length > 1) {
+        calcValue = calcValue.slice(0, -1);
+    } else {
+        calcValue = '0';
+    }
+    updateDisplay();
+}
+
+function toggleSign() {
+    const value = parseFloat(calcValue);
+    if (value !== 0) {
+        calcValue = (-value).toString();
+        updateDisplay();
+    }
+}
+
+function calculateResult() {
+    try {
+        let expression = calcHistory;
         
-        function backspaceCalc() {
-            if (calcValue.length > 1) {
-                calcValue = calcValue.slice(0, -1);
-            } else {
-                calcValue = '0';
+        // Если есть незаконченная операция, добавляем текущее число
+        if (expression && !expression.endsWith(' ') && !expression.includes('=')) {
+            expression += ' ' + calcValue;
+        } else if (expression.includes('=')) {
+            // Если уже был результат, начинаем новое вычисление
+            const parts = expression.split('=');
+            if (parts.length > 1) {
+                expression = parts[1].trim();
             }
-            updateDisplay();
+        } else {
+            // Просто показываем текущее значение
+            expression = calcValue;
         }
         
-        function toggleSign() {
-            const value = parseFloat(calcValue);
-            if (value !== 0) {
-                calcValue = (-value).toString();
-                updateDisplay();
-            }
+        // Заменяем символы для eval
+        let evalExpression = expression
+            .replace(/÷/g, '/')
+            .replace(/×/g, '*')
+            .replace(/−/g, '-');
+        
+        // Безопасное вычисление
+        let result;
+        try {
+            // Используем более безопасный метод вычисления
+            result = safeEval(evalExpression);
+        } catch (e) {
+            // Альтернативный метод, если первый не сработал
+            result = Function('"use strict"; return (' + evalExpression + ')')();
         }
         
-        function calculateResult() {
-            try {
-                let expression = calcHistory;
-                if (expression && !expression.endsWith(' ')) {
-                    expression += ' ' + calcValue;
-                } else {
-                    expression = calcValue;
-                }
-                
-                let evalExpression = expression
-                    .replace(/÷/g, '/')
-                    .replace(/×/g, '*')
-                    .replace(/−/g, '-');
-                
-                const result = Function('"use strict"; return (' + evalExpression + ')')();
-                
-                calcValue = Number.isInteger(result) ? 
-                    result.toString() : 
-                    parseFloat(result.toFixed(6)).toString();
-                
-                document.getElementById('calcHistory').textContent = expression + ' =';
-                calcHistory = '';
-                
-                saveSimpleCalculation(expression, calcValue);
-                updateDisplay();
-                
-            } catch (error) {
-                calcValue = 'Ошибка';
-                calcHistory = '';
-                document.getElementById('calcHistory').textContent = '';
-                updateDisplay();
-                setTimeout(clearCalc, 1500);
-            }
+        // Обрабатываем результат
+        if (isNaN(result) || !isFinite(result)) {
+            throw new Error('Ошибка вычисления');
         }
         
-        function updateDisplay() {
-            document.getElementById('calcInput').value = calcValue;
-        }
+        // Форматируем результат
+        calcValue = formatResult(result);
+        document.getElementById('calcHistory').textContent = expression + ' =';
+        calcHistory = expression + ' = ' + calcValue;
+        waitingForOperand = true;
         
-        function copyResult() {
-            if (calcValue && calcValue !== '0' && calcValue !== 'Ошибка') {
-                navigator.clipboard.writeText(calcValue)
-                    .then(() => showNotification('Скопировано!', 'success'))
-                    .catch(() => showNotification('Ошибка копирования', 'warning'));
-            }
-        }
+        saveSimpleCalculation(expression, calcValue);
+        updateDisplay();
         
-        function clearHistory() {
-            document.getElementById('calcHistory').textContent = '';
-            calcHistory = '';
+    } catch (error) {
+        console.error('Calculation error:', error);
+        calcValue = 'Ошибка';
+        calcHistory = '';
+        document.getElementById('calcHistory').textContent = '';
+        updateDisplay();
+        setTimeout(() => {
+            clearCalc();
+            showNotification('Ошибка вычисления', 'warning');
+        }, 1500);
+    }
+}
+
+// Безопасная функция вычисления
+function safeEval(expression) {
+    // Удаляем все пробелы
+    expression = expression.replace(/\s+/g, '');
+    
+    // Проверяем выражение на безопасность
+    if (!/^[\d+\-*/().]*$/.test(expression)) {
+        throw new Error('Недопустимые символы');
+    }
+    
+    // Используем парсер выражений
+    try {
+        // Простой парсер для основных операций
+        return parseFloat(evaluateExpression(expression));
+    } catch (e) {
+        // Если не сработало, пробуем eval с проверкой
+        if (expression.includes('/0')) {
+            throw new Error('Деление на ноль');
         }
+        return eval(expression);
+    }
+}
+
+// Простой парсер выражений
+function evaluateExpression(expr) {
+    // Обработка скобок
+    while (expr.includes('(') && expr.includes(')')) {
+        const start = expr.lastIndexOf('(');
+        const end = expr.indexOf(')', start);
+        if (end === -1) break;
+        
+        const subExpr = expr.substring(start + 1, end);
+        const result = evaluateSimple(subExpr);
+        expr = expr.substring(0, start) + result + expr.substring(end + 1);
+    }
+    
+    return evaluateSimple(expr);
+}
+
+function evaluateSimple(expr) {
+    // Умножение и деление
+    expr = expr.replace(/(\d*\.?\d+)([*\/])(\d*\.?\d+)/g, (match, a, op, b) => {
+        a = parseFloat(a);
+        b = parseFloat(b);
+        return op === '*' ? (a * b) : (a / b);
+    });
+    
+    // Сложение и вычитание
+    expr = expr.replace(/(\d*\.?\d+)([+\-])(\d*\.?\d+)/g, (match, a, op, b) => {
+        a = parseFloat(a);
+        b = parseFloat(b);
+        return op === '+' ? (a + b) : (a - b);
+    });
+    
+    return parseFloat(expr).toString();
+}
+
+// Форматирование результата
+function formatResult(result) {
+    // Округляем до 8 знаков после запятой
+    let rounded = Math.round(result * 100000000) / 100000000;
+    
+    // Если число целое, убираем .0
+    if (Number.isInteger(rounded)) {
+        return rounded.toString();
+    }
+    
+    // Убираем лишние нули в конце
+    let str = rounded.toString();
+    if (str.includes('.')) {
+        str = str.replace(/(\.\d*?)0+$/, '$1');
+        if (str.endsWith('.')) {
+            str = str.slice(0, -1);
+        }
+    }
+    
+    // Если слишком длинное, используем экспоненциальную запись
+    if (str.length > 12) {
+        return rounded.toExponential(6);
+    }
+    
+    return str;
+}
+
+function updateDisplay() {
+    // Ограничиваем длину отображаемого значения
+    if (calcValue.length > 15) {
+        document.getElementById('calcInput').value = calcValue.substring(0, 12) + '...';
+    } else {
+        document.getElementById('calcInput').value = calcValue;
+    }
+}
+
+function copyResult() {
+    if (calcValue && calcValue !== '0' && calcValue !== 'Ошибка') {
+        navigator.clipboard.writeText(calcValue)
+            .then(() => showNotification('Скопировано!', 'success'))
+            .catch(() => showNotification('Ошибка копирования', 'warning'));
+    }
+}
+
+function clearHistory() {
+    document.getElementById('calcHistory').textContent = '';
+    calcHistory = '';
+    waitingForOperand = false;
+}
         
         // ========== ЭЛЕКТРО КАЛЬКУЛЯТОР ==========
         function changeCalculator() {
