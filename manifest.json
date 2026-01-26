@@ -1,6 +1,6 @@
 {
   "name": "PWA Электро Калькулятор PRO",
-  "short_name": "Electric_Group",
+  "short_name": "PWA_ElCalc",
   "description": "Профессиональный калькулятор для электриков с 13 инструментами",
   "start_url": "https://alivu.github.io/Ali/",
   "display": "standalone",
