@@ -8,6 +8,179 @@
     <link rel="icon" href="https://raw.githubusercontent.com/Alivu/alivu.github.io/main/Icon/icon-32x32.png">
     
     <style>
+
+
+/* Модальное окно предупреждения */
+.warning-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: slideUp 0.4s ease-out;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+}
+
+.modal-header h3 {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.modal-body {
+    padding: 25px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.modal-body p {
+    margin-bottom: 15px;
+}
+
+.modal-body ul {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
+    padding-left: 5px;
+}
+
+.checkbox-group {
+    margin: 25px 0;
+    padding: 15px;
+    background: #fff8e1;
+    border-radius: 8px;
+    border-left: 4px solid #ff9800;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 3px;
+    cursor: pointer;
+    accent-color: #2196f3;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 14px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.accept-btn {
+    background: #4caf50;
+    color: white;
+}
+
+.accept-btn:enabled:hover {
+    background: #43a047;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.accept-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Темная тема для модального окна */
+body.dark-theme .modal-content {
+    background: #2d2d2d;
+    color: #e0e0e0;
+}
+
+body.dark-theme .modal-body {
+    color: #e0e0e0;
+}
+
+body.dark-theme .checkbox-group {
+    background: #424242;
+    color: #e0e0e0;
+}
+
+body.dark-theme .modal-footer {
+    background: #333;
+}
+
+body.dark-theme .checkbox-group label {
+    color: #e0e0e0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+        
         :root {
             --primary: #1a237e;
             --secondary: #2196f3;
@@ -969,6 +1142,41 @@
         </button>
     </div>
 
+
+    <!-- Модальное окно предупреждения -->
+<div class="warning-modal" id="warningModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Внимание! Тестовый режим</h3>
+        </div>
+        <div class="modal-body">
+            <p>Этот калькулятор находится на стадии проверки и может содержать ошибки.</p>
+            <p>Используя функционал, вы подтверждаете, что проверяете результаты самостоятельно и принимаете решения на свой страх и риск.</p>
+            <p><strong>Разработчик не несёт ответственности за любые последствия, связанные с использованием калькулятора.</strong></p>
+            
+            <p>Вы можете помочь в улучшении проекта:</p>
+            <ul>
+                <li>протестировать функции как тестировщик и сообщить, что работает неправильно;</li>
+                <li>оставить отзыв в боте обратной связи;</li>
+                <li>написать мне лично по номеру: +7 (963) 598-48-46.</li>
+            </ul>
+            
+            <p>Спасибо за участие в развитии проекта!</p>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="acceptWarning" name="acceptWarning">
+                <label for="acceptWarning">Я ознакомился с предупреждением, понимаю, что калькулятор работает в тестовом режиме, и принимаю всю ответственность за применение полученных данных.</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn accept-btn" id="acceptBtn" disabled>
+                <i class="fas fa-check-circle"></i> Принять и продолжить
+            </button>
+        </div>
+    </div>
+</div>
+    
+    
     <script>
         // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
         let calcHistory = '';
@@ -1061,13 +1269,13 @@
             usageStats.totalCalculations = calculationsHistory.length;
             localStorage.setItem('calcStats', JSON.stringify(usageStats));
             
-            // Приветствие
-            if (!localStorage.getItem('calcWelcomeShown')) {
-                setTimeout(() => {
-                    showNotification('Электро-Калькулятор PRO готов к работе! ⚡', 'success');
-                    localStorage.setItem('calcWelcomeShown', 'true');
-                }, 1000);
-            }
+  //          // Приветствие
+  //          if (!localStorage.getItem('calcWelcomeShown')) {
+  //              setTimeout(() => {
+  //                  showNotification('Электро-Калькулятор PRO готов к работе! ⚡', 'success');
+  //                  localStorage.setItem('calcWelcomeShown', 'true');
+  //              }, 1000);
+  //          }
         }
         
         function updateStats() {
@@ -2751,6 +2959,72 @@ else recommendedCable = '70+ мм² (медь) или несколько лин�
             }
         `;
         document.head.appendChild(style);
+
+// ========== МОДАЛЬНОЕ ОКНО ПРЕДУПРЕЖДЕНИЯ ==========
+function showWarningModal() {
+    // Проверяем, показывалось ли уже предупреждение
+    const warningShown = localStorage.getItem('warningShown');
+    
+    // Если уже показывалось и пользователь принял - не показываем
+    if (warningShown === 'accepted') {
+        return;
+    }
+    
+    // Показываем модальное окно
+    const modal = document.getElementById('warningModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Блокируем скролл страницы
+    }
+}
+
+function hideWarningModal() {
+    const modal = document.getElementById('warningModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Возвращаем скролл
+        
+        // Показываем приветственное сообщение
+        setTimeout(() => {
+            showNotification('Электро-Калькулятор PRO готов к работе! ⚡', 'success');
+        }, 500);
+    }
+}
+
+// Инициализация модального окна при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Показываем предупреждение после небольшой задержки
+    setTimeout(showWarningModal, 800);
+    
+    // Обработчик чекбокса
+    const acceptCheckbox = document.getElementById('acceptWarning');
+    const acceptBtn = document.getElementById('acceptBtn');
+    
+    if (acceptCheckbox && acceptBtn) {
+        acceptCheckbox.addEventListener('change', function() {
+            acceptBtn.disabled = !this.checked;
+        });
+        
+        // Обработчик кнопки принятия
+        acceptBtn.addEventListener('click', function() {
+            if (!acceptCheckbox.checked) return;
+            
+            // Сохраняем в localStorage, что пользователь принял предупреждение
+            localStorage.setItem('warningShown', 'accepted');
+            
+            // Скрываем модальное окно
+            hideWarningModal();
+            
+            // Инициализируем остальное приложение
+            init();
+            updateStats();
+            loadHistory();
+            changeCalculator();
+        });
+    }
+});
+
+        
     </script>
 </body>
 </html>
