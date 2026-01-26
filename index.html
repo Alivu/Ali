@@ -3876,7 +3876,27 @@ function checkInstallStatus() {
 
 // Проверяем при загрузке
 document.addEventListener('DOMContentLoaded', checkInstallStatus);
-        
+        // ========== ОФФЛАЙН ДЕТЕКТОР ==========
+// Проверяем онлайн статус
+function updateOnlineStatus() {
+    if (navigator.onLine) {
+        document.body.classList.remove('offline');
+        // Показываем уведомление при восстановлении связи
+        setTimeout(() => {
+            showNotification('Соединение восстановлено', 'success');
+        }, 500);
+    } else {
+        document.body.classList.add('offline');
+        showNotification('Работаем в оффлайн режиме ⚡', 'warning');
+    }
+}
+
+// Слушаем события онлайн/оффлайн
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// Проверяем при загрузке
+updateOnlineStatus();
     </script>
 // Регистрируем Service Worker
 if ('serviceWorker' in navigator) {
