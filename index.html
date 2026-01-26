@@ -1076,7 +1076,66 @@ body.dark-theme .form-actions {
     flex: 0 0 50%;
     max-width: 50%;
 }
-        
+        /* ========== СТИЛИ ДЛЯ PWA РЕЖИМА (Решение 5) ========== */
+
+/* Компактный заголовок в PWA режиме */
+body.pwa-title-mode .logo-text h1 {
+    font-size: 1.2rem !important;
+    margin-bottom: 3px !important;
+    letter-spacing: 0.5px;
+}
+
+body.pwa-title-mode .logo-text p {
+    font-size: 0.75rem !important;
+    opacity: 0.9 !important;
+}
+
+body.pwa-title-mode .logo-icon {
+    width: 45px !important;
+    height: 45px !important;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 480px) {
+    body.pwa-title-mode .logo-text h1 {
+        font-size: 1.1rem !important;
+    }
+    
+    body.pwa-title-mode .logo-text p {
+        font-size: 0.7rem !important;
+    }
+    
+    body.pwa-title-mode .logo-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+/* Анимация для плавного перехода */
+.logo-text h1,
+.logo-text p,
+.logo-icon {
+    transition: all 0.3s ease;
+}
+
+/* Индикатор PWA режима (опционально) */
+body.pwa-title-mode .header::after {
+    content: '📱';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+/* Для темной темы */
+body.dark-theme.pwa-title-mode .logo-text h1 {
+    color: #ffffff;
+}
+
+body.dark-theme.pwa-title-mode .logo-text p {
+    color: #bbbbbb;
+}
     </style>
 </head>
 <body>
@@ -3897,6 +3956,138 @@ window.addEventListener('offline', updateOnlineStatus);
 
 // Проверяем при загрузке
 updateOnlineStatus();
+
+        // ========== PWA ЗАГОЛОВОК (Решение 5) ==========
+function updateTitleForPWA() {
+    // Проверяем все возможные признаки PWA режима
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isiOSPWA = window.navigator.standalone === true;
+    const isAndroidPWA = window.matchMedia('(display-mode: fullscreen)').matches;
+    
+    // Проверяем, запущено ли как приложение
+    const isPWA = isStandalone || isiOSPWA || isAndroidPWA;
+    
+    if (isPWA) {
+        console.log('📱 Режим PWA активирован');
+        
+        // 1. Обновляем заголовок окна (title)
+        document.title = 'ЭлектроКальк PRO';
+        
+        // 2. Обновляем видимый заголовок на странице
+        const titleElement = document.querySelector('.logo-text h1');
+        if (titleElement) {
+            titleElement.innerHTML = '<i class="fas fa-bolt"></i> ЭлектроКальк PRO';
+            titleElement.style.fontSize = '1.2rem';
+            titleElement.style.marginBottom = '3px';
+        }
+        
+        // 3. Обновляем подзаголовок
+        const subtitleElement = document.querySelector('.logo-text p');
+        if (subtitleElement) {
+            subtitleElement.innerHTML = 'Electric_Group | +7 (963) 598-48-46';
+            subtitleElement.style.fontSize = '0.75rem';
+            subtitleElement.style.opacity = '0.9';
+        }
+        
+        // 4. Уменьшаем шапку для компактности
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.padding = '12px 20px';
+        }
+        
+        // 5. Добавляем класс для CSS стилизации
+        document.body.classList.add('pwa-title-mode');
+        
+        // 6. Показываем уведомление (только при первом запуске)
+        if (!localStorage.getItem('pwaTitleAdjusted')) {
+            setTimeout(() => {
+                showNotification('📱 Режим приложения активирован', 'info');
+                localStorage.setItem('pwaTitleAdjusted', 'true');
+            }, 1000);
+        }
+        
+    } else {
+        // Браузерный режим - восстанавливаем оригинальный заголовок
+        document.title = '⚡ Электро-Калькулятор PRO | Electric_Group';
+        
+        // Восстанавливаем оригинальный заголовок на странице
+        const titleElement = document.querySelector('.logo-text h1');
+        if (titleElement) {
+            titleElement.innerHTML = '<i class="fas fa-bolt"></i> Электро-Калькулятор PRO';
+            titleElement.style.fontSize = '';
+            titleElement.style.marginBottom = '';
+        }
+        
+        const subtitleElement = document.querySelector('.logo-text p');
+        if (subtitleElement) {
+            subtitleElement.innerHTML = 'Electric_Group | +7 (963) 598-48-46';
+            subtitleElement.style.fontSize = '';
+            subtitleElement.style.opacity = '';
+        }
+        
+        // Убираем компактный режим
+        document.body.classList.remove('pwa-title-mode');
+    }
+}
+
+// Слушаем изменение режима отображения (на случай, если пользователь переключает режим)
+window.matchMedia('(display-mode: standalone)').addListener(updateTitleForPWA);
+window.matchMedia('(display-mode: fullscreen)').addListener(updateTitleForPWA);
+
+// Вызываем при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Небольшая задержка для гарантии, что DOM полностью загружен
+    setTimeout(updateTitleForPWA, 100);
+});
+
+// Также проверяем при изменении видимости страницы
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        setTimeout(updateTitleForPWA, 300);
+    }
+});
+
+// Проверяем при возврате на страницу (для iOS)
+window.addEventListener('pageshow', updateTitleForPWA);
+
+// ========== ДОПОЛНИТЕЛЬНО: Кнопка переключения заголовка для теста ==========
+function addPwaTestButton() {
+    // Создаем кнопку для тестирования PWA режима (только в разработке)
+    if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
+        const testBtn = document.createElement('button');
+        testBtn.innerHTML = '🔧 Тест PWA заголовка';
+        testBtn.style.cssText = `
+            position: fixed;
+            bottom: 70px;
+            right: 15px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        `;
+        testBtn.onclick = function() {
+            // Переключаем режим PWA для тестирования
+            if (document.body.classList.contains('pwa-title-mode')) {
+                document.body.classList.remove('pwa-title-mode');
+                document.title = '⚡ Электро-Калькулятор PRO | Electric_Group';
+                showNotification('Режим браузера', 'info');
+            } else {
+                document.body.classList.add('pwa-title-mode');
+                document.title = 'ЭлектроКальк PRO';
+                showNotification('Режим PWA', 'success');
+            }
+        };
+        document.body.appendChild(testBtn);
+    }
+}
+
+// Добавляем тестовую кнопку в режиме разработки
+document.addEventListener('DOMContentLoaded', addPwaTestButton);
     </script>
 // Регистрируем Service Worker
 if ('serviceWorker' in navigator) {
