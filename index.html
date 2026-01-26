@@ -2046,207 +2046,196 @@ function calculateBreaker() {
     return html;
 }
         
-        function calculateCurrent() {
-            const power = parseFloat(document.getElementById('currentPower').value) || 0;
-            const voltage = parseInt(document.getElementById('currentVoltage').value) || 220;
-            const cosPhi = parseFloat(document.getElementById('currentCos').value) || 1;
-            const phase = parseInt(document.getElementById('currentPhase').value) || 1;
-            const cableSection = document.getElementById('currentCable').value;
-            
-            if (!power) throw new Error('Введите мощность');
-            
-            let current;
-            if (phase === 1) {
-                current = (power * 1000) / (voltage * cosPhi);
-            } else {
-                current = (power * 1000) / (Math.sqrt(3) * voltage * cosPhi);
-            }
-            
-            let html = `
-                <div class="result-item success">
-                    <strong>Расчетный ток нагрузки:</strong> ${current.toFixed(1)} А
-                </div>
-                <div class="result-item">
-                    <strong>Напряжение:</strong> ${voltage}В (${phase === 3 ? '3 фазы' : '1 фаза'})
-                </div>
-                <div class="result-item">
-                    <strong>Коэффициент мощности:</strong> ${cosPhi}
-                </div>
-            `;
-            
-// Полная таблица токов для кабелей (медь, открытая прокладка)
-const cableCurrents = {
-    1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
-    16: 63, 25: 80, 35: 100, 50: 125, 70: 160
-};
-
-// Рекомендации по кабелю
-let recommendedCable = '';
-if (current <= 16) {
-    recommendedCable = '1.5-2.5 мм² (медь)';
-} else if (current <= 25) {
-    recommendedCable = '2.5-4 мм² (медь)';
-} else if (current <= 32) {
-    recommendedCable = '4-6 мм² (медь)';
-} else if (current <= 40) {
-    recommendedCable = '6-10 мм² (медь)';
-} else if (current <= 50) {
-    recommendedCable = '10 мм² (медь)';
-} else if (current <= 63) {
-    recommendedCable = '10-16 мм² (медь)';
-} else if (current <= 80) {
-    recommendedCable = '16-25 мм² (медь)';
-} else if (current <= 100) {
-    recommendedCable = '25-35 мм² (медь)';
-} else if (current <= 125) {
-    recommendedCable = '35-50 мм² (медь)';
-} else if (current <= 160) {
-    recommendedCable = '50-70 мм² (медь)';
-} else {
-    recommendedCable = '70+ мм² (медь) или несколько линий';
-}
-
-html += `<div class="result-item info">
-    <strong>Рекомендуемое сечение кабеля (медь, открытая):</strong> ${recommendedCable}
-</div>`;
-
-// Проверка выбранного кабеля
-if (cableSection) {
-    const maxCurrent = cableCurrents[cableSection] || 0;
-    if (maxCurrent > 0) {
-        const safetyMargin = maxCurrent * 0.9; // 10% запас
-        
-        if (current > safetyMargin) {
-            html += `<div class="result-item ${current > maxCurrent ? 'danger' : 'warning'}">
-                <strong>${current > maxCurrent ? '⚠️ ОПАСНО!' : '⚠️ Внимание!'}</strong> 
-                Кабель ${cableSection} мм² ${current > maxCurrent ? 'не подходит!' : 'близок к пределу!'}<br>
-                Макс. ток: ${maxCurrent}А (рекомендуемый запас: ${safetyMargin.toFixed(1)}А)
-            </div>`;
-        } else {
-            html += `<div class="result-item success">
-                <strong>✅ Кабель ${cableSection} мм² подходит</strong><br>
-                Макс. ток: ${maxCurrent}А (запас ${(safetyMargin - current).toFixed(1)}А)
-            </div>`;
-        }
+function calculateCurrent() {
+    const power = parseFloat(document.getElementById('currentPower').value) || 0;
+    const voltage = parseInt(document.getElementById('currentVoltage').value) || 220;
+    const cosPhi = parseFloat(document.getElementById('currentCos').value) || 1;
+    const phase = parseInt(document.getElementById('currentPhase').value) || 1;
+    const cableSection = document.getElementById('currentCable').value;
+    
+    if (!power) throw new Error('Введите мощность');
+    
+    let current;
+    if (phase === 1) {
+        current = (power * 1000) / (voltage * cosPhi);
+    } else {
+        current = (power * 1000) / (Math.sqrt(3) * voltage * cosPhi);
     }
-}
-
-// Для больших токов - рекомендация по фазности
-if (current > 100 && voltage === 220) {
-    html += `<div class="result-item warning">
-        <strong>Рекомендация:</strong> Для мощности ${power} кВт рекомендуется 380В (3 фазы)
-    </div>`;
-}
+    
+    // Полная таблица токов для кабелей (медь, открытая прокладка)
+    const cableCurrents = {
+        1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
+        16: 63, 25: 80, 35: 100, 50: 125, 70: 160
+    };
+    
+    // Рекомендации по кабелю
+    let recommendedCable = '';
+    if (current <= 16) {
+        recommendedCable = '1.5-2.5 мм² (медь)';
+    } else if (current <= 25) {
+        recommendedCable = '2.5-4 мм² (медь)';
+    } else if (current <= 32) {
+        recommendedCable = '4-6 мм² (медь)';
+    } else if (current <= 40) {
+        recommendedCable = '6-10 мм² (медь)';
+    } else if (current <= 50) {
+        recommendedCable = '10 мм² (медь)';
+    } else if (current <= 63) {
+        recommendedCable = '10-16 мм² (медь)';
+    } else if (current <= 80) {
+        recommendedCable = '16-25 мм² (медь)';
+    } else if (current <= 100) {
+        recommendedCable = '25-35 мм² (медь)';
+    } else if (current <= 125) {
+        recommendedCable = '35-50 мм² (медь)';
+    } else if (current <= 160) {
+        recommendedCable = '50-70 мм² (медь)';
+    } else {
+        recommendedCable = '70+ мм² (медь) или несколько линий';
+    }
+    
+    let html = `
+        <div class="result-item success">
+            <strong>Расчетный ток нагрузки:</strong> ${current.toFixed(1)} А
+        </div>
+        <div class="result-item">
+            <strong>Напряжение:</strong> ${voltage}В (${phase === 3 ? '3 фазы' : '1 фаза'})
+        </div>
+        <div class="result-item">
+            <strong>Коэффициент мощности:</strong> ${cosPhi}
+        </div>
+        <div class="result-item info">
+            <strong>Рекомендуемое сечение кабеля (медь, открытая):</strong> ${recommendedCable}
+        </div>
+    `;
+    
+    // Проверка выбранного кабеля
+    if (cableSection) {
+        const maxCurrent = cableCurrents[cableSection] || 0;
+        if (maxCurrent > 0) {
+            const safetyMargin = maxCurrent * 0.9; // 10% запас
             
-            return html;
-        }
-        
-        function calculateVoltageDrop() {
-            const power = parseFloat(document.getElementById('voltagePower').value) || 0;
-            const length = parseFloat(document.getElementById('voltageLength').value) || 0;
-            const cableSection = parseFloat(document.getElementById('voltageCable').value) || 2.5;
-            const material = document.getElementById('voltageMaterial').value;
-            const startVoltage = parseInt(document.getElementById('voltageStart').value) || 220;
-            const phase = parseInt(document.getElementById('voltagePhase').value) || 1;
-            
-            if (!power || !length) throw new Error('Введите мощность и длину');
-            
-            // Расчет тока
-            let current;
-            if (phase === 1) {
-                current = (power * 1000) / startVoltage;
+            if (current > safetyMargin) {
+                html += `<div class="result-item ${current > maxCurrent ? 'danger' : 'warning'}">
+                    <strong>${current > maxCurrent ? '⚠️ ОПАСНО!' : '⚠️ Внимание!'}</strong> 
+                    Кабель ${cableSection} мм² ${current > maxCurrent ? 'не подходит!' : 'близок к пределу!'}<br>
+                    Макс. ток: ${maxCurrent}А (рекомендуемый запас: ${safetyMargin.toFixed(1)}А)
+                </div>`;
             } else {
-                current = (power * 1000) / (Math.sqrt(3) * startVoltage);
+                html += `<div class="result-item success">
+                    <strong>✅ Кабель ${cableSection} мм² подходит</strong><br>
+                    Макс. ток: ${maxCurrent}А (запас ${(safetyMargin - current).toFixed(1)}А)
+                </div>`;
             }
-            
-            // Сопротивление
-            const resistivity = material === 'copper' ? 0.0175 : 0.028;
-            let voltageDrop;
-            
-            if (phase === 1) {
-                voltageDrop = (2 * current * length * resistivity) / cableSection;
-            } else {
-                voltageDrop = (Math.sqrt(3) * current * length * resistivity) / cableSection;
-            }
-            
-            const voltageDropPercent = (voltageDrop / startVoltage) * 100;
-            const endVoltage = startVoltage - voltageDrop;
-            
-            html = `
-                <div class="result-item">
-                    <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А
-                </div>
-                <div class="result-item">
-                    <strong>Начальное напряжение:</strong> ${startVoltage} В
-                </div>
-                <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}">
-                    <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
-                </div>
-                <div class="result-item">
-                    <strong>Конечное напряжение:</strong> ${endVoltage.toFixed(1)} В
-                </div>
-                <div class="result-item">
-                    <strong>Кабель:</strong> ${cableSection} мм² ${material}
-                </div>
-            `;
-            
-if (voltageDropPercent > 5) {
-    const newSection = Math.ceil(cableSection * (voltageDropPercent / 3));
-    // Ищем ближайшее стандартное сечение
-    const standardSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70];
-    let recommendedSection = cableSection;
-    for (const section of standardSections) {
-        if (section >= newSection) {
-            recommendedSection = section;
-            break;
         }
     }
     
-    html += `<div class="result-item danger">
-        <strong>⚠️ Превышение нормы ПУЭ (5%)!</strong> Увеличьте сечение до ${recommendedSection} мм²
-    </div>`;
-} else if (voltageDropPercent > 3) {
-    const recommendedSection = Math.ceil(cableSection * 1.5);
-    html += `<div class="result-item warning">
-        <strong>⚠️ Близко к пределу.</strong> Рекомендуется сечение ${recommendedSection} мм²
-    </div>`;
-}
-
-// Максимальные токи для кабелей (для информации)
-const cableCurrents = {
-    copper: {
-        1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
-        16: 63, 25: 80, 35: 100, 50: 125, 70: 160
-    },
-    aluminum: {
-        1.5: 12, 2.5: 19, 4: 25, 6: 32, 10: 40,
-        16: 50, 25: 65, 35: 80, 50: 100, 70: 125
+    // Для больших токов - рекомендация по фазности
+    if (current > 100 && voltage === 220) {
+        html += `<div class="result-item warning">
+            <strong>Рекомендация:</strong> Для мощности ${power} кВт рекомендуется 380В (3 фазы)
+        </div>`;
     }
-};
-
-const maxCurrent = cableCurrents[material][cableSection] || 160;
-const currentPercent = (current / maxCurrent) * 100;
-
-let html = `
-    <div class="result-item">
-        <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А (${currentPercent.toFixed(1)}% от макс.)
-    </div>
-    <div class="result-item">
-        <strong>Начальное напряжение:</strong> ${startVoltage} В
-    </div>
-    <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}">
-        <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
-    </div>
-    <div class="result-item">
-        <strong>Конечное напряжение:</strong> ${endVoltage.toFixed(1)} В
-    </div>
-    <div class="result-item">
-        <strong>Кабель:</strong> ${cableSection} мм² ${material} (макс. ${maxCurrent}А)
-    </div>
-`;
-            
-            return html;
+    
+    return html;
+}
+        
+function calculateVoltageDrop() {
+    const power = parseFloat(document.getElementById('voltagePower').value) || 0;
+    const length = parseFloat(document.getElementById('voltageLength').value) || 0;
+    const cableSection = parseFloat(document.getElementById('voltageCable').value) || 2.5;
+    const material = document.getElementById('voltageMaterial').value;
+    const startVoltage = parseInt(document.getElementById('voltageStart').value) || 220;
+    const phase = parseInt(document.getElementById('voltagePhase').value) || 1;
+    
+    if (!power || !length) throw new Error('Введите мощность и длину');
+    
+    // Расчет тока
+    let current;
+    if (phase === 1) {
+        current = (power * 1000) / startVoltage;
+    } else {
+        current = (power * 1000) / (Math.sqrt(3) * startVoltage);
+    }
+    
+    // Сопротивление
+    const resistivity = material === 'copper' ? 0.0175 : 0.028;
+    let voltageDrop;
+    
+    if (phase === 1) {
+        voltageDrop = (2 * current * length * resistivity) / cableSection;
+    } else {
+        voltageDrop = (Math.sqrt(3) * current * length * resistivity) / cableSection;
+    }
+    
+    const voltageDropPercent = (voltageDrop / startVoltage) * 100;
+    const endVoltage = startVoltage - voltageDrop;
+    
+    // Максимальные токи для кабелей (для информации)
+    const cableCurrents = {
+        copper: {
+            1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
+            16: 63, 25: 80, 35: 100, 50: 125, 70: 160
+        },
+        aluminum: {
+            1.5: 12, 2.5: 19, 4: 25, 6: 32, 10: 40,
+            16: 50, 25: 65, 35: 80, 50: 100, 70: 125
         }
+    };
+    
+    const maxCurrent = cableCurrents[material][cableSection] || 160;
+    const currentPercent = (current / maxCurrent) * 100;
+    
+    let html = `
+        <div class="result-item">
+            <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А (${currentPercent.toFixed(1)}% от макс.)
+        </div>
+        <div class="result-item">
+            <strong>Начальное напряжение:</strong> ${startVoltage} В
+        </div>
+        <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}">
+            <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
+        </div>
+        <div class="result-item">
+            <strong>Конечное напряжение:</strong> ${endVoltage.toFixed(1)} В
+        </div>
+        <div class="result-item">
+            <strong>Кабель:</strong> ${cableSection} мм² ${material} (макс. ${maxCurrent}А)
+        </div>
+    `;
+    
+    if (voltageDropPercent > 5) {
+        const newSection = Math.ceil(cableSection * (voltageDropPercent / 3));
+        // Ищем ближайшее стандартное сечение
+        const standardSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70];
+        let recommendedSection = cableSection;
+        for (const section of standardSections) {
+            if (section >= newSection) {
+                recommendedSection = section;
+                break;
+            }
+        }
+        
+        html += `<div class="result-item danger">
+            <strong>⚠️ Превышение нормы ПУЭ (5%)!</strong> Увеличьте сечение до ${recommendedSection} мм²
+        </div>`;
+    } else if (voltageDropPercent > 3) {
+        const recommendedSection = Math.ceil(cableSection * 1.5);
+        html += `<div class="result-item warning">
+            <strong>⚠️ Близко к пределу.</strong> Рекомендуется сечение ${recommendedSection} мм²
+        </div>`;
+    }
+    
+    // Проверка по току
+    if (current > maxCurrent * 0.9) {
+        html += `<div class="result-item ${current > maxCurrent ? 'danger' : 'warning'}">
+            <strong>${current > maxCurrent ? '⚠️ ОПАСНО!' : '⚠️ Внимание!'}</strong>
+            Ток ${current.toFixed(1)}А ${current > maxCurrent ? 'превышает' : 'близок к'} макс. ${maxCurrent}А
+        </div>`;
+    }
+    
+    return html;
+}
         
         function calculatePower() {
             const current = parseFloat(document.getElementById('powerCurrent').value) || 0;
