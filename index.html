@@ -2172,7 +2172,7 @@ if (current > 100 && voltage === 220) {
             const voltageDropPercent = (voltageDrop / startVoltage) * 100;
             const endVoltage = startVoltage - voltageDrop;
             
-            let html = `
+            html = `
                 <div class="result-item">
                     <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А
                 </div>
