@@ -1178,7 +1178,7 @@ body.dark-theme .checkbox-group label {
     
     
     <script>
-        // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+         ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
         let calcHistory = '';
         let calcValue = '0';
         let lastOperation = '';
@@ -1264,6 +1264,11 @@ body.dark-theme .checkbox-group label {
         });
         
         function init() {
+                // Убедимся, что переменные инициализированы
+    if (typeof calcHistory === 'undefined') calcHistory = '';
+    if (typeof calcValue === 'undefined') calcValue = '0';
+    if (typeof lastOperation === 'undefined') lastOperation = '';
+    if (typeof waitingForOperand === 'undefined') waitingForOperand = false;
             // Обновляем статистику
             usageStats.lastUsed = new Date().toISOString();
             usageStats.totalCalculations = calculationsHistory.length;
@@ -1313,11 +1318,6 @@ body.dark-theme .checkbox-group label {
         }
         
 // ========== ОБЫЧНЫЙ КАЛЬКУЛЯТОР ==========
-let calcHistory = '';
-let calcValue = '0';
-let lastOperation = '';
-let waitingForOperand = false;
-
 function appendToCalc(value) {
     if (['+', '-', '*', '/'].includes(value)) {
         // Если это операция и мы уже вводим число, сохраняем его
