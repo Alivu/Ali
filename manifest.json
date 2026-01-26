@@ -1,12 +1,11 @@
 {
-  "name": "ЭлектроСмета",
-  "short_name": "ЭлектроСмета",
-  "description": "Профессиональный расчет смет для электриков ЧР",
-  "start_url": "https://alivu.github.io/electro-smeta/",
-  "scope": "https://alivu.github.io/electro-smeta/",
+  "name": "Электро-Калькулятор PRO",
+  "short_name": "ЭлектроКальк",
+  "description": "Профессиональный калькулятор для электриков с 13 инструментами",
+  "start_url": "https://alivu.github.io/Ali/",
   "display": "standalone",
-  "background_color": "#f5f7fa",
-  "theme_color": "#2c3e50",
+  "background_color": "#1a237e",
+  "theme_color": "#1a237e",
   "orientation": "portrait",
   "icons": [
     {
@@ -49,5 +48,8 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "categories": ["utilities", "productivity", "education"],
+  "lang": "ru-RU",
+  "dir": "ltr"
 }
