@@ -2442,54 +2442,63 @@ case 'cable_pro':
         </div>
     `;
     
-    // Инициализация зависимых полей и синхронизации
-    setTimeout(() => {
-        const voltageSelect = document.getElementById('cableProVoltage');
-        const phaseSelect = document.getElementById('cableProPhase');
-        const powerInput = document.getElementById('cableProPower');
-        const currentInput = document.getElementById('cableProCurrent');
-        
-        if (!voltageSelect || !phaseSelect || !powerInput || !currentInput) return;
-        
-        // Логика для фазности
-        voltageSelect.addEventListener('change', function() {
-            const voltage = parseInt(this.value);
-            if (voltage === 380 || voltage === 400) {
-                phaseSelect.value = '3';
-            } else {
-                phaseSelect.value = '1';
+// Инициализация зависимых полей и синхронизации
+setTimeout(() => {
+    const voltageSelect = document.getElementById('cableProVoltage');
+    const phaseSelect = document.getElementById('cableProPhase');
+    const powerInput = document.getElementById('cableProPower');
+    const currentInput = document.getElementById('cableProCurrent');
+    
+    if (!voltageSelect || !phaseSelect || !powerInput || !currentInput) return;
+    
+    // Логика для фазности (без изменений)
+    voltageSelect.addEventListener('change', function() {
+        const voltage = parseInt(this.value);
+        if (voltage === 380 || voltage === 400) {
+            phaseSelect.value = '3';
+        } else {
+            phaseSelect.value = '1';
+        }
+        if (powerInput.value) {
+            const power = parseFloat(powerInput.value);
+            if (power) {
+                currentInput.value = (power / parseInt(this.value)).toFixed(2);
             }
-            // При изменении напряжения пересчитываем ток
-            if (powerInput.value) {
-                const power = parseFloat(powerInput.value);
-                if (power) {
-                    currentInput.value = (power / parseInt(this.value)).toFixed(2);
-                }
-            }
-        });
-        
-        // Синхронизация: Вт → А
-        powerInput.addEventListener('input', function() {
-            const power = parseFloat(this.value);
-            const voltage = parseInt(voltageSelect.value) || 220;
-            if (power && !isNaN(power) && power > 0) {
-                const calculatedCurrent = power / voltage;
-                currentInput.value = calculatedCurrent.toFixed(2);
-            }
-        });
-        
-        // Синхронизация: А → Вт
-        currentInput.addEventListener('input', function() {
-            const current = parseFloat(this.value);
-            const voltage = parseInt(voltageSelect.value) || 220;
-            if (current && !isNaN(current) && current > 0) {
-                const calculatedPower = current * voltage;
-                powerInput.value = Math.round(calculatedPower);
-            }
-        });
-        
-    }, 200);
-    break;
+        }
+    });
+    
+    // Синхронизация: Вт → А
+    powerInput.addEventListener('input', function() {
+        const power = parseFloat(this.value);
+        const voltage = parseInt(voltageSelect.value) || 220;
+        if (power && !isNaN(power) && power > 0) {
+            currentInput.value = (power / voltage).toFixed(2);
+        } else {
+            currentInput.value = '';
+        }
+    });
+    
+    // Синхронизация: А → Вт
+    currentInput.addEventListener('input', function() {
+        const current = parseFloat(this.value);
+        const voltage = parseInt(voltageSelect.value) || 220;
+        if (current && !isNaN(current) && current > 0) {
+            powerInput.value = Math.round(current * voltage);
+        } else {
+            powerInput.value = '';
+        }
+    });
+    
+    // ВАЖНО: Принудительный расчет при загрузке
+    if (powerInput.value) {
+        const power = parseFloat(powerInput.value);
+        const voltage = parseInt(voltageSelect.value) || 220;
+        if (power) {
+            currentInput.value = (power / voltage).toFixed(2);
+        }
+    }
+    
+}, 200);
                     
                 case 'led':
                     html = `
