@@ -293,6 +293,116 @@
         .table-breaker th {
             background: #f8f9fa;
         }
+        
+        /* НОВЫЕ СТИЛИ ДЛЯ ТАБЛИЦЫ */
+        .sections-table-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .sections-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .sections-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .sections-table td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .sections-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .sections-table .section-highlight {
+            background-color: #fff3cd;
+            font-weight: 600;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .copper-row {
+            background-color: rgba(184, 115, 51, 0.05);
+        }
+        
+        .aluminum-row {
+            background-color: rgba(160, 160, 160, 0.05);
+        }
+        
+        .power-value {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .breaker-value-table {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #e9ecef;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .table-caption {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .table-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .table-tab {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .table-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .table-tab:hover {
+            background: #e9ecef;
+        }
+        
+        .table-tab.active:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .info-note {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -380,6 +490,45 @@
         </div>
     </div>
     
+    <!-- НОВАЯ ТАБЛИЦА СЕЧЕНИЙ -->
+    <div class="sections-table-card">
+        <h5>📊 Таблица выбора сечения кабеля</h5>
+        <div class="table-caption">
+            <strong>Условные обозначения:</strong> 
+            <span class="badge bg-success">Медь</span> 
+            <span class="badge bg-secondary">Алюминий</span>
+            <span class="badge bg-warning text-dark">Выделено текущее сечение</span>
+        </div>
+        
+        <div class="table-tabs">
+            <span class="table-tab active" onclick="filterTable('all')">Все сечения</span>
+            <span class="table-tab" onclick="filterTable('copper')">Только медь</span>
+            <span class="table-tab" onclick="filterTable('aluminum')">Только алюминий</span>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="sections-table" id="sectionsTable">
+                <thead>
+                    <tr>
+                        <th>Сечение (мм²)</th>
+                        <th>Ток (А)</th>
+                        <th>Автомат (А)</th>
+                        <th>Нагрузка 220В (кВт)</th>
+                        <th>Нагрузка 380В (кВт)</th>
+                        <th>Материал</th>
+                    </tr>
+                </thead>
+                <tbody id="sectionsTableBody">
+                    <!-- Данные будут заполнены JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        <div class="info-note">
+            * Нагрузка указана для меди/алюминия при 220В (однофазная) и 380В (трехфазная).<br>
+            * Автомат подобран с запасом 90% от допустимого тока кабеля.
+        </div>
+    </div>
+    
     <div id="result" class="result-card" style="display: none;"></div>
     <div id="graphContainer" class="graph-container" style="display: none;">
         <canvas id="voltageGraph" width="400" height="100"></canvas>
@@ -417,17 +566,20 @@
     // Стандартные номиналы автоматических выключателей (А)
     const BREAKER_RATINGS = [6, 10, 13, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000];
     
-    // Типы характеристик автоматов и их применение
+    // Типы характеристик автоматов
     const BREAKER_CHARACTERISTICS = {
-        'B': 'Для освещения и бытовых нагрузок (3-5 In)',
-        'C': 'Для смешанных нагрузок и небольших моторов (5-10 In)',
-        'D': 'Для мощных моторов и трансформаторов (10-20 In)'
+        'B': 'Для освещения и бытовых нагрузок',
+        'C': 'Для смешанных нагрузок',
+        'D': 'Для мощных моторов'
     };
+    
+    // Все доступные сечения
+    const SECTIONS = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
     
     // История расчетов
     let calculationHistory = [];
     
-    // Загрузка истории из localStorage при старте
+    // Загрузка истории
     function loadHistory() {
         const saved = localStorage.getItem('calcHistory');
         if (saved) {
@@ -444,7 +596,6 @@
             results: results
         });
         
-        // Ограничиваем историю 10 записями
         if (calculationHistory.length > 10) {
             calculationHistory = calculationHistory.slice(0, 10);
         }
@@ -484,6 +635,7 @@
         document.getElementById('material').value = item.params.material;
         document.getElementById('cableSection').value = item.params.cableSection;
         calculateDrop();
+        filterTable('all');
     }
     
     // Очистка истории
@@ -504,7 +656,7 @@
         const sections = Object.keys(CURRENT_TABLE[material]).map(Number).sort((a, b) => a - b);
         
         for (let section of sections) {
-            if (CURRENT_TABLE[material][section] >= current * 1.1) { // Запас 10%
+            if (CURRENT_TABLE[material][section] >= current * 1.1) {
                 return section;
             }
         }
@@ -512,12 +664,7 @@
     }
     
     // Подбор номинала автоматического выключателя
-    function selectBreaker(current, maxCurrent, section) {
-        // Правила выбора автомата:
-        // 1. Номинал автомата должен быть меньше или равен максимальному току кабеля
-        // 2. Номинал автомата должен быть больше или равен рабочему току
-        // 3. Выбираем ближайший стандартный номинал
-        
+    function selectBreaker(current, maxCurrent) {
         let selectedBreaker = null;
         
         for (let rating of BREAKER_RATINGS) {
@@ -527,13 +674,10 @@
             }
         }
         
-        // Если не нашли подходящий (ток слишком маленький или большой)
         if (!selectedBreaker) {
             if (current > maxCurrent) {
-                // Ток превышает допустимый для кабеля
                 selectedBreaker = BREAKER_RATINGS.find(r => r <= maxCurrent) || maxCurrent;
             } else {
-                // Для очень маленьких токов
                 selectedBreaker = BREAKER_RATINGS[0];
             }
         }
@@ -545,17 +689,89 @@
     function getRecommendedCharacteristic(power, voltage) {
         const current = power / voltage;
         
-        // Для бытовых нагрузок обычно используют характеристику C
-        // Для освещения - B
-        // Для мощных моторов - D
-        
         if (power < 1000) {
-            return 'B'; // Для освещения и слаботочных нагрузок
+            return 'B';
         } else if (power >= 1000 && power < 5000) {
-            return 'C'; // Для смешанных нагрузок
+            return 'C';
         } else {
-            return 'D'; // Для мощных нагрузок с пусковыми токами
+            return 'D';
         }
+    }
+    
+    // Расчет максимальной мощности для напряжения
+    function calculateMaxPower(current, voltage) {
+        if (voltage === 380) {
+            return (Math.sqrt(3) * voltage * current / 1000).toFixed(2);
+        } else {
+            return (voltage * current / 1000).toFixed(2);
+        }
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Заполнение таблицы сечений
+    function populateSectionsTable(filter = 'all') {
+        const tbody = document.getElementById('sectionsTableBody');
+        const selectedSection = parseFloat(document.getElementById('cableSection').value);
+        const selectedMaterial = document.getElementById('material').value;
+        
+        tbody.innerHTML = '';
+        
+        SECTIONS.forEach(section => {
+            const copperCurrent = CURRENT_TABLE.copper[section];
+            const aluminumCurrent = CURRENT_TABLE.aluminum[section];
+            
+            // Подбор автоматов (с запасом 90% от допустимого тока)
+            const copperBreaker = selectBreaker(copperCurrent * 0.9, copperCurrent);
+            const aluminumBreaker = selectBreaker(aluminumCurrent * 0.9, aluminumCurrent);
+            
+            // Расчет мощности
+            const copperPower220 = calculateMaxPower(copperCurrent, 220);
+            const copperPower380 = calculateMaxPower(copperCurrent, 380);
+            const aluminumPower220 = calculateMaxPower(aluminumCurrent, 220);
+            const aluminumPower380 = calculateMaxPower(aluminumCurrent, 380);
+            
+            // Строка для меди
+            if (filter === 'all' || filter === 'copper') {
+                const isHighlighted = (section === selectedSection && selectedMaterial === 'copper');
+                tbody.innerHTML += `
+                    <tr class="copper-row ${isHighlighted ? 'section-highlight' : ''}">
+                        <td><strong>${section}</strong></td>
+                        <td>${copperCurrent} А</td>
+                        <td><span class="breaker-value-table">${copperBreaker} А</span></td>
+                        <td class="power-value">${copperPower220} кВт</td>
+                        <td class="power-value">${copperPower380} кВт</td>
+                        <td><span class="badge bg-success">Медь</span></td>
+                    </tr>
+                `;
+            }
+            
+            // Строка для алюминия
+            if (filter === 'all' || filter === 'aluminum') {
+                const isHighlighted = (section === selectedSection && selectedMaterial === 'aluminum');
+                tbody.innerHTML += `
+                    <tr class="aluminum-row ${isHighlighted ? 'section-highlight' : ''}">
+                        <td><strong>${section}</strong></td>
+                        <td>${aluminumCurrent} А</td>
+                        <td><span class="breaker-value-table">${aluminumBreaker} А</span></td>
+                        <td class="power-value">${aluminumPower220} кВт</td>
+                        <td class="power-value">${aluminumPower380} кВт</td>
+                        <td><span class="badge bg-secondary">Алюминий</span></td>
+                    </tr>
+                `;
+            }
+        });
+        
+        // Обновление активной вкладки
+        document.querySelectorAll('.table-tab').forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.textContent.includes('Все') && filter === 'all') tab.classList.add('active');
+            if (tab.textContent.includes('медь') && filter === 'copper') tab.classList.add('active');
+            if (tab.textContent.includes('Алюминий') && filter === 'aluminum') tab.classList.add('active');
+        });
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Фильтрация таблицы
+    function filterTable(type) {
+        populateSectionsTable(type);
     }
     
     // Рисование графика напряжения
@@ -566,7 +782,6 @@
         
         container.style.display = 'block';
         
-        // Очистка canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         const startX = 50;
@@ -575,11 +790,11 @@
         const remainingVoltage = voltage - voltageDrop;
         const dropPointX = startX + (endX - startX) * (remainingVoltage / voltage);
         
-        // Рисование фона
+        // Фон
         ctx.fillStyle = '#f8f9fa';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Рисование шкалы
+        // Шкала
         ctx.beginPath();
         ctx.strokeStyle = '#ddd';
         ctx.lineWidth = 1;
@@ -590,7 +805,7 @@
         ctx.lineTo(endX, 70);
         ctx.stroke();
         
-        // Рисование линии напряжения (зеленая - оставшееся напряжение)
+        // Зеленая линия (оставшееся напряжение)
         ctx.beginPath();
         ctx.strokeStyle = '#28a745';
         ctx.lineWidth = 4;
@@ -599,7 +814,7 @@
         ctx.lineTo(dropPointX, y);
         ctx.stroke();
         
-        // Рисование линии падения (красная - потеря)
+        // Красная линия (потеря)
         ctx.beginPath();
         ctx.strokeStyle = '#dc3545';
         ctx.lineWidth = 4;
@@ -608,7 +823,7 @@
         ctx.lineTo(endX, y);
         ctx.stroke();
         
-        // Рисование маркеров
+        // Маркеры
         ctx.beginPath();
         ctx.fillStyle = '#28a745';
         ctx.arc(startX, y, 6, 0, 2 * Math.PI);
@@ -632,7 +847,7 @@
         ctx.fillText(`-${voltageDrop.toFixed(1)}V`, endX + 10, y - 10);
     }
     
-    // Основная функция расчета
+    // ОСНОВНАЯ ФУНКЦИЯ РАСЧЕТА (ваша существующая)
     function calculateDrop() {
         // Получаем значения из формы
         const voltage = parseFloat(document.getElementById('voltage').value);
@@ -671,11 +886,11 @@
         const recommendedMaxCurrent = getMaxCurrent(recommendedSection, material);
         
         // Подбор автомата для текущего сечения
-        const breakerCurrent = selectBreaker(current, maxCurrent, cableSection);
+        const breakerCurrent = selectBreaker(current, maxCurrent);
         const breakerCharacteristic = getRecommendedCharacteristic(power, voltage);
         
         // Подбор автомата для рекомендуемого сечения
-        const recommendedBreakerCurrent = selectBreaker(current, recommendedMaxCurrent, recommendedSection);
+        const recommendedBreakerCurrent = selectBreaker(current, recommendedMaxCurrent);
         const recommendedBreakerCharacteristic = getRecommendedCharacteristic(power, voltage);
         
         // Формирование результата
@@ -785,7 +1000,6 @@
                 </div>
             `;
         } else {
-            // Проверка соответствия автомата и кабеля
             if (breakerCurrent > maxCurrent) {
                 resultHTML += `
                     <div class="warning-message">
@@ -856,13 +1070,17 @@
             recommendedBreakerCurrent: recommendedBreakerCurrent
         });
         
+        // Обновление таблицы с выделением текущего сечения
+        filterTable('all');
+        
         // Плавная прокрутка к результату
         resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     
-    // Загрузка истории при старте
+    // Загрузка истории и заполнение таблицы при старте
     window.onload = function() {
         loadHistory();
+        populateSectionsTable('all');
         
         // Добавление обработчика для клавиши Enter
         document.getElementById('calculatorForm').addEventListener('keypress', function(e) {
@@ -871,10 +1089,19 @@
                 calculateDrop();
             }
         });
+        
+        // Обновление таблицы при изменении выбора
+        document.getElementById('cableSection').addEventListener('change', function() {
+            filterTable('all');
+        });
+        
+        document.getElementById('material').addEventListener('change', function() {
+            filterTable('all');
+        });
     };
 </script>
 
-<!-- Подключение Bootstrap JS (для работы некоторых компонентов) -->
+<!-- Подключение Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
