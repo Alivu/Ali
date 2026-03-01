@@ -3514,7 +3514,7 @@ else recommendedCable = '70+ мм² (медь) или несколько лин�
             return calculateCableProDetailed();
         }
 
-// ИСПРАВЛЕННАЯ ФУНКЦИЯ С ПРАВИЛЬНЫМИ ТАБЛИЦАМИ
+// ========== ПОЛНАЯ ИСПРАВЛЕННАЯ ФУНКЦИЯ ==========
 function calculateCableProDetailed() {
     try {
         // Получаем значения
@@ -3526,12 +3526,12 @@ function calculateCableProDetailed() {
         const material = document.getElementById('cableProMaterial').value;
         const selectedSection = parseFloat(document.getElementById('cableProSection').value) || 16;
         const method = document.getElementById('cableProMethod').value;
-        const maxLossPercent = parseFloat(document.getElementById('cableProLoss').value) || 3;
+        const maxLossPercent = parseFloat(document.getElementById('cableProLoss').value) || 5;
         const cosPhi = parseFloat(document.getElementById('cableProCos').value) || 0.95;
         const cableTemp = parseFloat(document.getElementById('cableProTemp').value) || 30;
         const wiresCount = parseInt(document.getElementById('cableProWires').value) || 2;
         const ambientTemp = parseFloat(document.getElementById('cableProAmbientTemp').value) || 25;
-        const powerMargin = parseFloat(document.getElementById('cableProMargin').value) || 15;
+        const powerMargin = parseFloat(document.getElementById('cableProMargin').value) || 10;
         
         // Проверка входных данных
         if ((!power && !currentInput) || !length) {
@@ -3564,8 +3564,7 @@ function calculateCableProDetailed() {
         const tempCoefficient = 0.00403;
         const resistivity = resistivityBase * (1 + tempCoefficient * (cableTemp - 20));
         
-        // ========== ПРАВИЛЬНЫЕ ТАБЛИЦЫ ПО ПУЭ 7 ==========
-        // Базовые токи для меди (открытая прокладка, 25°C)
+        // Базовые токи по ПУЭ 7
         const baseCurrents = {
             copper: {
                 1.5: 19, 2.5: 27, 4: 36, 6: 46, 10: 63,
@@ -3581,23 +3580,12 @@ function calculateCableProDetailed() {
         
         // Коэффициенты для способов прокладки
         const methodCoefficients = {
-            open: 1.0,        // Открытая
-            closed: 0.9,       // Скрытая
-            pipe2: 0.8,        // Два одножильных в трубе
-            pipe3: 0.7,        // Три одножильных в трубе
-            pipe4: 0.65,       // Четыре одножильных в трубе
-            pipe2c: 0.75,      // Один двухжильный в трубе
-            pipe3c: 0.7,       // Один трёхжильный в трубе
-            tray1: 0.95,       // Короб, 1-4 кабеля
-            tray2: 0.85,       // Короб, 5-6 кабелей
-            tray3: 0.8,        // Короб, 7-9 кабелей
-            tray4: 0.75,       // Короб, 10-11 кабелей
-            tray5: 0.7,        // Короб, 12-14 кабелей
-            tray6: 0.65,       // Короб, 15-18 кабелей
-            tray_many: 0.6     // Короб, более 18 кабелей
+            open: 1.0, closed: 0.9, pipe2: 0.8, pipe3: 0.7, pipe4: 0.65,
+            pipe2c: 0.75, pipe3c: 0.7, tray1: 0.95, tray2: 0.9, tray3: 0.85,
+            tray4: 0.8, tray5: 0.75, tray6: 0.7, tray_many: 0.65
         };
         
-        // Коэффициент на температуру окружающей среды
+        // Температурный коэффициент
         let tempCorrection = 1.0;
         if (ambientTemp > 25) {
             tempCorrection = 1 - (ambientTemp - 25) * 0.01;
@@ -3610,20 +3598,14 @@ function calculateCableProDetailed() {
         // Коэффициент на количество жил
         const wiresCorrection = wiresCount >= 3 ? 0.9 : 1.0;
         
-        // Получаем базовый ток для выбранного сечения
+        // Получаем максимальный ток для выбранного сечения
         const baseCurrent = baseCurrents[material][selectedSection];
         if (!baseCurrent) {
             throw new Error(`Сечение ${selectedSection} мм² не найдено в таблице`);
         }
         
-        // Применяем все коэффициенты
-        const maxCurrentForSelected = Math.round(baseCurrent * 
-            (methodCoefficients[method] || 1.0) * 
-            tempCorrection * 
-            wiresCorrection);
-        
-        const isCurrentOk = current <= maxCurrentForSelected;
-        const currentLoadPercent = (current / maxCurrentForSelected) * 100;
+        const methodCoeff = methodCoefficients[method] || 0.75;
+        const maxCurrentForSelected = Math.round(baseCurrent * methodCoeff * tempCorrection * wiresCorrection);
         
         // Расчет падения напряжения
         let voltageDrop;
@@ -3635,7 +3617,6 @@ function calculateCableProDetailed() {
         
         const voltageDropPercent = (voltageDrop / voltage) * 100;
         const endVoltage = voltage - voltageDrop;
-        const isVoltageOk = voltageDropPercent <= maxLossPercent;
         
         // Расчет сопротивления
         let wireResistance;
@@ -3663,10 +3644,7 @@ function calculateCableProDetailed() {
         for (const section of sections) {
             const baseCur = baseCurrents[material][section];
             if (baseCur) {
-                const maxCur = Math.round(baseCur * 
-                    (methodCoefficients[method] || 1.0) * 
-                    tempCorrection * 
-                    wiresCorrection);
+                const maxCur = Math.round(baseCur * methodCoeff * tempCorrection * wiresCorrection);
                 if (maxCur >= currentWithMargin) {
                     recommendedByCurrent = section;
                     break;
@@ -3692,9 +3670,109 @@ function calculateCableProDetailed() {
         
         const overallRecommended = Math.max(recommendedByCurrent, recommendedByVoltage);
         
+        // ========== АНАЛИЗ ЗАПАСА ПРОЧНОСТИ ==========
+        const loadPercent = (current / maxCurrentForSelected) * 100;
+        const remainingPercent = 100 - loadPercent;
+        
+        let safetyHTML = '';
+        
+        if (loadPercent > 100) {
+            safetyHTML = `
+                <div class="result-item danger" style="margin-top: 15px;">
+                    <strong><i class="fas fa-skull-crosswalk"></i> КРИТИЧЕСКАЯ ПЕРЕГРУЗКА!</strong><br>
+                    Ток ${current.toFixed(2)} А превышает максимально допустимый ${maxCurrentForSelected} А<br>
+                    <span style="color: #d32f2f; font-size: 1.1rem;">Перегрузка: ${(loadPercent - 100).toFixed(1)}%</span><br>
+                    <strong>НЕМЕДЛЕННО увеличьте сечение до ${overallRecommended} мм²!</strong><br>
+                    <small>Категорически запрещено использовать текущее сечение!</small>
+                </div>
+            `;
+        }
+        else if (loadPercent > 90) {
+            safetyHTML = `
+                <div class="result-item danger" style="margin-top: 15px;">
+                    <strong><i class="fas fa-fire"></i> КРИТИЧЕСКИЙ РЕЖИМ!</strong><br>
+                    Загрузка кабеля: ${loadPercent.toFixed(1)}%<br>
+                    <span style="color: #d32f2f;">Работа на пределе! Остаток запаса: ${remainingPercent.toFixed(1)}%</span><br>
+                    <strong>Настоятельно рекомендуется увеличить сечение до ${overallRecommended} мм²</strong><br>
+                    <small>При такой нагрузке кабель будет перегреваться</small>
+                </div>
+            `;
+        }
+        else if (loadPercent > 80) {
+            safetyHTML = `
+                <div class="result-item warning" style="margin-top: 15px;">
+                    <strong><i class="fas fa-exclamation-triangle"></i> МАЛЫЙ ЗАПАС ПРОЧНОСТИ</strong><br>
+                    Загрузка кабеля: ${loadPercent.toFixed(1)}%<br>
+                    Остаток запаса: ${remainingPercent.toFixed(1)}% (рекомендуется минимум 20-30%)<br>
+                    <span style="color: #f57c00;">Технически допустимо, но при увеличении нагрузки потребуется замена</span><br>
+                    <strong>Для надежности рекомендуется сечение ${overallRecommended} мм²</strong>
+                </div>
+            `;
+        }
+        else if (loadPercent > 70) {
+            safetyHTML = `
+                <div class="result-item info" style="margin-top: 15px;">
+                    <strong><i class="fas fa-info-circle"></i> ДОПУСТИМО, НО БЕЗ ЗАПАСА</strong><br>
+                    Загрузка кабеля: ${loadPercent.toFixed(1)}%<br>
+                    Запас: ${remainingPercent.toFixed(1)}%<br>
+                    Сечение ${selectedSection} мм² подходит по расчету, но не имеет запаса на рост нагрузки.<br>
+                    <span>Оптимальное сечение с запасом: ${overallRecommended} мм²</span>
+                </div>
+            `;
+        }
+        else {
+            safetyHTML = `
+                <div class="result-item success" style="margin-top: 15px;">
+                    <strong><i class="fas fa-check-circle"></i> ОПТИМАЛЬНЫЙ ЗАПАС</strong><br>
+                    Загрузка кабеля: ${loadPercent.toFixed(1)}%<br>
+                    Запас: ${remainingPercent.toFixed(1)}% (рекомендуется 20-30%)<br>
+                    Сечение ${selectedSection} мм² выбрано правильно с хорошим запасом прочности.
+                </div>
+            `;
+        }
+        
+        // Добавляем сравнение с рекомендуемым сечением если оно больше текущего
+        if (overallRecommended > selectedSection) {
+            const baseRecCurrent = baseCurrents[material][overallRecommended];
+            const recommendedMaxCurrent = Math.round(baseRecCurrent * methodCoeff * tempCorrection * wiresCorrection);
+            const recommendedLoad = (current / recommendedMaxCurrent) * 100;
+            
+            safetyHTML += `
+                <div class="result-item" style="margin-top: 10px; background: #f5f5f5;">
+                    <strong>📊 Сравнение с рекомендуемым сечением ${overallRecommended} мм²:</strong><br>
+                    <table style="width:100%; margin-top:5px; border-collapse: collapse;">
+                        <tr>
+                            <th style="text-align:left; padding:5px;">Параметр</th>
+                            <th style="text-align:center; padding:5px;">Текущее (${selectedSection} мм²)</th>
+                            <th style="text-align:center; padding:5px;">Рекомендуемое (${overallRecommended} мм²)</th>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px;">Макс. ток</td>
+                            <td style="text-align:center; padding:5px;">${maxCurrentForSelected} А</td>
+                            <td style="text-align:center; padding:5px;">${recommendedMaxCurrent} А</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px;">Загрузка</td>
+                            <td style="text-align:center; padding:5px; ${loadPercent > 80 ? 'color:#d32f2f; font-weight:bold;' : 'color:#2e7d32;'}">${loadPercent.toFixed(1)}%</td>
+                            <td style="text-align:center; padding:5px; color:#2e7d32;">${recommendedLoad.toFixed(1)}%</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:5px;">Запас</td>
+                            <td style="text-align:center; padding:5px;">${remainingPercent.toFixed(1)}%</td>
+                            <td style="text-align:center; padding:5px;">${(100 - recommendedLoad).toFixed(1)}%</td>
+                        </tr>
+                    </table>
+                    <p style="margin-top:10px; font-size:0.9rem;">
+                        ${loadPercent > 80 ? '⚠️ Текущее сечение работает на пределе. ' : ''}
+                        Рекомендуемое сечение даст запас ${(100 - recommendedLoad).toFixed(1)}%.
+                    </p>
+                </div>
+            `;
+        }
+        
         // ========== ФОРМИРОВАНИЕ РЕЗУЛЬТАТА ==========
         let html = `
-            <div class="result-item ${isCurrentOk && isVoltageOk ? 'success' : isCurrentOk || isVoltageOk ? 'warning' : 'danger'}">
+            <div class="result-item">
                 <strong><i class="fas fa-check-circle"></i> Выбранное сечение:</strong> ${selectedSection} мм²
             </div>
             
@@ -3705,11 +3783,9 @@ function calculateCableProDetailed() {
                         <br><small>С запасом ${powerMargin}%: ${currentWithMargin.toFixed(2)} А</small>
                     </div>
                     
-                    <div class="result-item ${currentLoadPercent > 100 ? 'danger' : currentLoadPercent > 90 ? 'warning' : 'success'}">
+                    <div class="result-item">
                         <strong>Макс. ток для кабеля:</strong> ${maxCurrentForSelected} А
-                        <br><small>Загрузка: ${currentLoadPercent.toFixed(1)}%</small>
-                        ${currentLoadPercent > 100 ? '<br><strong style="color: #d32f2f;">⚠️ ПРЕВЫШЕНИЕ! Кабель перегружен!</strong>' : ''}
-                        ${currentLoadPercent > 90 && currentLoadPercent <= 100 ? '<br><strong style="color: #f57c00;">⚠️ Близко к пределу!</strong>' : ''}
+                        <br><small>Загрузка: ${loadPercent.toFixed(1)}%</small>
                     </div>
                     
                     <div class="result-item">
@@ -3738,9 +3814,9 @@ function calculateCableProDetailed() {
                         <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(2)} В (${voltageDropPercent.toFixed(2)}%)
                         <br>
                         <small>
-                            ${voltageDropPercent > maxLossPercent ? '⚠️ Превышение допустимых потерь!' : 
+                            ${voltageDropPercent > maxLossPercent ? '⚠️ Превышение!' : 
                               voltageDropPercent > maxLossPercent * 0.8 ? '⚠️ Близко к пределу' : 
-                              '✅ В пределах нормы'}
+                              '✅ В норме'}
                         </small>
                     </div>
                     
@@ -3755,74 +3831,19 @@ function calculateCableProDetailed() {
             </div>
         `;
         
-        // Рекомендации по увеличению сечения
-        if (recommendedByCurrent > selectedSection || recommendedByVoltage > selectedSection) {
-            html += `
-                <div class="result-item danger" style="margin-top: 15px;">
-                    <strong><i class="fas fa-exclamation-triangle"></i> ТРЕБУЕТСЯ УВЕЛИЧИТЬ СЕЧЕНИЕ!</strong><br>
-                    <table style="width: 100%; margin-top: 10px;">
-                        <tr>
-                            <td>По току:</td>
-                            <td><strong>${recommendedByCurrent > selectedSection ? 'нужно ' + recommendedByCurrent + ' мм²' : '✓ достаточно'}</strong></td>
-                        </tr>
-                        <tr>
-                            <td>По падению напряжения:</td>
-                            <td><strong>${recommendedByVoltage > selectedSection ? 'нужно ' + recommendedByVoltage + ' мм²' : '✓ достаточно'}</strong></td>
-                        </tr>
-                        <tr style="background: #ffebee; font-weight: bold;">
-                            <td>Рекомендуемое сечение:</td>
-                            <td style="color: #d32f2f; font-size: 1.2rem;">${overallRecommended} мм²</td>
-                        </tr>
-                    </table>
-                </div>
-            `;
-        } else if (recommendedByCurrent < selectedSection && recommendedByVoltage < selectedSection) {
-            html += `
-                <div class="result-item success" style="margin-top: 15px;">
-                    <strong><i class="fas fa-check-circle"></i> Сечение выбрано с запасом</strong><br>
-                    Достаточно ${overallRecommended} мм²
-                </div>
-            `;
-        }
+        // Добавляем анализ безопасности
+        html += safetyHTML;
         
         // Детали расчета
         html += `
             <div class="result-item info" style="margin-top: 15px;">
                 <strong><i class="fas fa-info-circle"></i> Детали расчета:</strong>
-                <table style="width: 100%; margin-top: 10px; font-size: 0.85rem;">
-                    <tr>
-                        <td>Способ прокладки:</td>
-                        <td>${getProMethodName(method)}</td>
-                    </tr>
-                    <tr>
-                        <td>Температура жил:</td>
-                        <td>${cableTemp}°C</td>
-                    </tr>
-                    <tr>
-                        <td>Температура среды:</td>
-                        <td>${ambientTemp}°C</td>
-                    </tr>
-                    <tr>
-                        <td>Коэффициент прокладки:</td>
-                        <td>${methodCoefficients[method] || 1.0}</td>
-                    </tr>
-                    <tr>
-                        <td>Температурный коэффициент:</td>
-                        <td>${tempCorrection.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                        <td>Коэффициент жил:</td>
-                        <td>${wiresCorrection.toFixed(2)}</td>
-                    </tr>
+                <table style="width:100%; margin-top:10px; font-size:0.85rem;">
+                    <tr><td>Способ прокладки:</td><td>${method}</td></tr>
+                    <tr><td>Коэффициент прокладки:</td><td>${methodCoeff}</td></tr>
+                    <tr><td>Температура среды:</td><td>${ambientTemp}°C (коэф. ${tempCorrection.toFixed(2)})</td></tr>
+                    <tr><td>Количество жил:</td><td>${wiresCount} (коэф. ${wiresCorrection})</td></tr>
                 </table>
-            </div>
-            
-            <div class="result-item warning" style="margin-top: 15px;">
-                <strong><i class="fas fa-exclamation-triangle"></i> Примечание:</strong>
-                <p style="font-size: 0.8rem; margin-top: 5px;">
-                    Расчет выполнен по методике ПУЭ 7. Для ответственных объектов рекомендуется 
-                    дополнительная проверка расчетов специалистом.
-                </p>
             </div>
         `;
         
