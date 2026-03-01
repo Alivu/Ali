@@ -2,4124 +2,880 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ Электро-Калькулятор PRO | Electric_Group</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="https://raw.githubusercontent.com/Alivu/alivu.github.io/main/Icon/icon-32x32.png">
-    <!-- PWA манифест -->
-<link rel="manifest" href="https://alivu.github.io/Ali/manifest.json">
-<meta name="theme-color" content="#1a237e">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PWA Электро Калькулятор PRO">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Alivu/alivu.github.io/main/Icon/icon-180x180.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO Калькулятор падения напряжения</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-/* PWA Стили */
-.pwa-mode .container {
-    margin: 0;
-    border-radius: 0;
-    min-height: 100vh;
-}
-
-.pwa-mode body {
-    padding: 0;
-}
-
-/* Кнопка установки */
-.float-btn.install {
-    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-    color: white;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
-    }
-}
-
-/* Оффлайн уведомление */
-.offline-notification {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #ff9800;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    z-index: 10001;
-    display: none;
-    font-weight: bold;
-}
-
-/* Оффлайн режим */
-body.offline .offline-notification {
-    display: block;
-}
-
-body.offline .container::before {
-    content: '⚡';
-    position: fixed;
-    top: 50px;
-    right: 15px;
-    background: #4caf50;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    z-index: 10000;
-    animation: blink 2s infinite;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* Модальное окно предупреждения */
-.warning-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 12px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    animation: slideUp 0.4s ease-out;
-}
-
-.modal-header {
-    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-}
-
-.modal-header h3 {
-    font-size: 1.3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.modal-body {
-    padding: 25px;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #333;
-}
-
-.modal-body p {
-    margin-bottom: 15px;
-}
-
-.modal-body ul {
-    margin-left: 20px;
-    margin-bottom: 20px;
-}
-
-.modal-body li {
-    margin-bottom: 8px;
-    padding-left: 5px;
-}
-
-.checkbox-group {
-    margin: 25px 0;
-    padding: 15px;
-    background: #fff8e1;
-    border-radius: 8px;
-    border-left: 4px solid #ff9800;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-top: 3px;
-    cursor: pointer;
-    accent-color: #2196f3;
-}
-
-.checkbox-group label {
-    cursor: pointer;
-    font-weight: 600;
-    color: #333;
-    line-height: 1.4;
-    flex: 1;
-}
-
-.modal-footer {
-    padding: 20px;
-    background: #f5f5f5;
-    border-radius: 0 0 12px 12px;
-    display: flex;
-    justify-content: center;
-}
-
-.modal-btn {
-    padding: 14px 30px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s;
-    min-width: 200px;
-    justify-content: center;
-}
-
-.accept-btn {
-    background: #4caf50;
-    color: white;
-}
-
-.accept-btn:enabled:hover {
-    background: #43a047;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-}
-
-.accept-btn:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-/* Темная тема для модального окна */
-body.dark-theme .modal-content {
-    background: #2d2d2d;
-    color: #e0e0e0;
-}
-
-body.dark-theme .modal-body {
-    color: #e0e0e0;
-}
-
-body.dark-theme .checkbox-group {
-    background: #424242;
-    color: #e0e0e0;
-}
-
-body.dark-theme .modal-footer {
-    background: #333;
-}
-
-body.dark-theme .checkbox-group label {
-    color: #e0e0e0;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-        
-        :root {
-            --primary: #1a237e;
-            --secondary: #2196f3;
-            --accent: #f44336;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --light: #f5f5f5;
-            --dark: #0d47a1;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --radius: 8px;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
         body {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-            color: #333;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            padding: 10px;
-            font-size: 14px;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .container {
-            max-width: 100%;
+        .calculator-container {
+            max-width: 900px;
             margin: 0 auto;
+        }
+        
+        .main-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
+            margin-bottom: 20px;
         }
         
-        /* Шапка */
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 20px;
-            text-align: center;
+            padding: 20px;
+            border-bottom: none;
         }
         
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            object-fit: cover;
-            background: white;
-            padding: 5px;
-        }
-        
-        .logo-text h1 {
-            font-size: 1.4rem;
-            margin-bottom: 3px;
-        }
-        
-        .logo-text p {
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-        
-        /* Вкладки */
-        .tabs {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            background: #f0f2f5;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        
-        .tab {
-            padding: 12px 8px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-            color: #666;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .tab i {
-            font-size: 1.2rem;
-        }
-        
-        .tab:hover {
-            background: #e3e8f0;
-        }
-        
-        .tab.active {
-            background: white;
-            color: var(--secondary);
-            border-bottom: 3px solid var(--secondary);
-        }
-        
-        /* Контент вкладок */
-        .tab-content {
-            display: none;
-            padding: 15px;
-            min-height: 450px;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Общий калькулятор - КОМПАКТНЫЙ */
-        .calc-display {
-            background: #2c3e50;
-            padding: 15px;
-            border-radius: var(--radius);
-            margin-bottom: 10px;
-        }
-        
-        .calc-history {
-            color: #95a5a6;
-            font-size: 0.8rem;
-            min-height: 18px;
-            margin-bottom: 8px;
-            text-align: right;
-            word-break: break-all;
-            font-family: 'Roboto Mono', monospace;
-        }
-        
-        .calc-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            text-align: right;
+        .card-header h2 {
+            margin: 0;
             font-weight: 300;
-            outline: none;
-            font-family: 'Roboto Mono', monospace;
             letter-spacing: 1px;
         }
         
-        .calc-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: var(--radius);
-        }
-        
-        .calc-btn {
-            height: 45px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-        }
-        
-        .calc-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .calc-btn.number {
-            background: white;
-            color: #333;
-            border: 1px solid #dee2e6;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        
-        .calc-btn.number:active {
-            background: #e9ecef;
-        }
-        
-        .calc-btn.zero {
-            grid-column: span 2;
-        }
-        
-        .calc-btn.operation {
-            background: var(--secondary);
-            color: white;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3);
-        }
-        
-        .calc-btn.operation:active {
-            background: #0d8bf2;
-        }
-        
-        .calc-btn.special {
-            background: #6c757d;
-            color: white;
-            font-size: 0.9rem;
-        }
-        
-        .calc-btn.special:active {
-            background: #5a6268;
-        }
-        
-        .calc-btn.equals {
-            background: var(--success);
-            color: white;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
-        }
-        
-        .calc-btn.equals:active {
-            background: #43a047;
-        }
-        
-        .calc-extra-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .extra-btn {
-            flex: 1;
-            padding: 10px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: background 0.3s;
-            font-weight: 500;
-        }
-        
-        .extra-btn:hover {
-            background: var(--dark);
-        }
-        
-        /* Электро калькулятор */
-        .electric-container {
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        
-        .calculator-selector {
-            margin-bottom: 15px;
-        }
-        
-        .calculator-selector select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: white;
-            cursor: pointer;
-            transition: border-color 0.3s;
-            color: #333;
-        }
-        
-        .calculator-selector select:focus {
-            border-color: var(--secondary);
-            outline: none;
-        }
-        
-        .electric-form {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: var(--radius);
-            margin-bottom: 15px;
+        .card-body {
+            padding: 30px;
         }
         
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
         
         .form-group label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
             display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #444;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
         
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            transition: border-color 0.3s;
-            background: white;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--secondary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-        }
-        
-        .form-group small {
-            display: block;
-            margin-top: 4px;
-            color: #666;
-            font-size: 0.75rem;
-            line-height: 1.3;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .input-group .form-group {
-            flex: 1;
-        }
-        
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin: 20px 0;
-        }
-        
-        .action-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 15px;
             transition: all 0.3s;
         }
         
-        .action-btn.calculate {
-            background: var(--success);
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 500;
             color: white;
-        }
-        
-        .action-btn.calculate:hover {
-            background: #43a047;
-        }
-        
-        .action-btn.reset {
-            background: var(--warning);
-            color: white;
-        }
-        
-        .action-btn.reset:hover {
-            background: #f57c00;
-        }
-        
-        .action-btn.save {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .action-btn.save:hover {
-            background: #0d8bf2;
-        }
-        
-        /* Результаты */
-        .results-container {
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
             margin-top: 20px;
-            display: none;
         }
         
-        .results-container.show {
-            display: block;
-            animation: slideUp 0.3s ease-out;
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
         
-        .result-header {
-            background: var(--primary);
-            color: white;
-            padding: 12px 15px;
-            border-radius: var(--radius) var(--radius) 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .result-header h3 {
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .result-content {
+        .result-card {
             background: white;
-            padding: 15px;
-            border-radius: 0 0 var(--radius) var(--radius);
-            border: 1px solid #e0e0e0;
-            border-top: none;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .result-alert {
+            border-radius: 10px;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .result-alert h4 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
         }
         
         .result-item {
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            border-left: 4px solid var(--secondary);
-            background: #f8f9fa;
-            font-size: 0.85rem;
-            line-height: 1.4;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
         }
         
-        .result-item strong {
-            color: var(--primary);
-            font-weight: 600;
+        .result-item:last-child {
+            border-bottom: none;
         }
         
-        .result-item.warning {
-            background: #fff8e1;
-            border-color: var(--warning);
-            color: #e65100;
-        }
-        
-        .result-item.danger {
-            background: #ffebee;
-            border-color: var(--accent);
-            color: #c62828;
-        }
-        
-        .result-item.success {
-            background: #e8f5e8;
-            border-color: var(--success);
-            color: #2e7d32;
-        }
-        
-        .result-item.info {
-            background: #e3f2fd;
-            border-color: var(--secondary);
-            color: #1565c0;
-        }
-        
-        /* История */
-        .history-container {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        
-        .history-item {
-            background: white;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: var(--radius);
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .history-item:hover {
-            transform: translateX(3px);
-            border-color: var(--secondary);
-            background: #f8f9fa;
-        }
-        
-        .history-item .date {
+        .result-label {
             color: #666;
-            font-size: 0.75rem;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            font-weight: 500;
         }
         
-        .history-item .type {
-            color: var(--secondary);
+        .result-value {
+            color: #333;
             font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
+        }
+        
+        .breaker-section {
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9f2f9 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #b8daff;
+        }
+        
+        .breaker-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0056b3;
+            margin-bottom: 10px;
+        }
+        
+        .breaker-box {
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: space-between;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
         }
         
-        .history-item .result {
-            font-size: 0.8rem;
-            color: #555;
-            line-height: 1.3;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+        .breaker-box.current {
+            border-left-color: #ffc107;
         }
         
-        /* Статистика */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+        .breaker-box.recommended {
+            border-left-color: #28a745;
+        }
+        
+        .breaker-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .breaker-type {
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .breaker-characteristic {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #0056b3;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .warning-message {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 12px 15px;
+            border-radius: 8px;
             margin-top: 15px;
         }
         
-        .stat-card {
+        .danger-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .history-card {
             background: white;
-            padding: 15px;
-            border-radius: var(--radius);
-            text-align: center;
-            box-shadow: var(--shadow);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
         }
         
-        .stat-icon {
-            font-size: 1.5rem;
-            color: var(--secondary);
-            margin-bottom: 8px;
-        }
-        
-        .stat-value {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 5px 0;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 0.75rem;
-        }
-        
-        /* Помощь */
-        .help-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: var(--radius);
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
         }
         
-        .help-section h3 {
-            color: var(--primary);
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
             margin-bottom: 10px;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .help-item {
-            margin-bottom: 12px;
-            padding-left: 15px;
-            border-left: 3px solid var(--secondary);
-        }
-        
-        .help-item strong {
-            color: var(--primary);
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.85rem;
-        }
-        
-        .help-item p {
-            color: #555;
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-        
-        /* Кнопки внизу */
-        .bottom-buttons {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-        
-        .float-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: none;
+            border-left: 4px solid #667eea;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            transition: transform 0.2s;
         }
         
-        .float-btn.back {
-            background: var(--primary);
+        .history-item:hover {
+            transform: translateX(5px);
+            background: #e9ecef;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .history-content {
+            font-size: 14px;
+        }
+        
+        .graph-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .graph-container canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        
+        .badge-pro {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
         }
         
-        .float-btn.refresh {
-            background: var(--success);
-            color: white;
+        .table-breaker {
+            font-size: 14px;
+            margin-top: 10px;
         }
         
-        .float-btn:hover {
-            transform: scale(1.1);
+        .table-breaker th {
+            background: #f8f9fa;
         }
-        
-        /* Анимации */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Скроллбар */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Адаптивность */
-        @media (min-width: 768px) {
-            .container {
-                max-width: 500px;
-                margin: 20px auto;
-            }
-            
-            .calc-btn {
-                height: 50px;
-                font-size: 1.1rem;
-            }
-            
-            .calc-input {
-                font-size: 2.2rem;
-            }
-            
-            .tab {
-                padding: 15px 10px;
-                font-size: 0.9rem;
-            }
-            
-            .stats-container {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .calc-btn {
-                height: 42px;
-                font-size: 0.95rem;
-            }
-            
-            .calc-input {
-                font-size: 1.6rem;
-            }
-            
-            .tab {
-                padding: 10px 5px;
-                font-size: 0.8rem;
-            }
-            
-            .tab i {
-                font-size: 1rem;
-            }
-            
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Темная тема */
-        body.dark-theme {
-            background: #121212;
-            color: #e0e0e0;
-        }
-        
-        body.dark-theme .container {
-            background: #1e1e1e;
-            color: #e0e0e0;
-        }
-        
-        body.dark-theme .tab {
-            background: #2d2d2d;
-            color: #b0b0b0;
-        }
-        
-        body.dark-theme .tab.active {
-            background: #333;
-            color: var(--secondary);
-        }
-        
-        body.dark-theme .calc-buttons {
-            background: #2d2d2d;
-        }
-        
-        body.dark-theme .calc-btn.number {
-            background: #333;
-            color: #e0e0e0;
-            border-color: #444;
-        }
-        
-        body.dark-theme .electric-form {
-            background: #2d2d2d;
-        }
-        
-        body.dark-theme .form-group input,
-        body.dark-theme .form-group select {
-            background: #333;
-            color: #e0e0e0;
-            border-color: #444;
-        }
-        
-        body.dark-theme .result-content {
-            background: #2d2d2d;
-            border-color: #444;
-        }
-        
-        body.dark-theme .result-item {
-            background: #333;
-            color: #e0e0e0;
-        }
-        
-        body.dark-theme .history-item {
-            background: #333;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-/* Стили для PRO калькулятора */
-.calculator-description {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    padding: 12px;
-    border-radius: var(--radius);
-    margin-bottom: 15px;
-    border-left: 4px solid #2196f3;
-}
-
-.calculator-description p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #1565c0;
-}
-
-.form-actions {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
-}
-
-/* Для темной темы */
-body.dark-theme .calculator-description {
-    background: linear-gradient(135deg, #2d2d2d 0%, #333 100%);
-    color: #e0e0e0;
-}
-
-body.dark-theme .form-actions {
-    border-top-color: #444;
-}
-
-/* Адаптивная сетка для результатов */
-.grid-x {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: -10px;
-    margin-right: -10px;
-}
-
-.cell {
-    flex: 1;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-.cell.medium-6 {
-    flex: 0 0 50%;
-    max-width: 50%;
-}
-        /* ========== СТИЛИ ДЛЯ PWA РЕЖИМА (Решение 5) ========== */
-
-/* Компактный заголовок в PWA режиме */
-body.pwa-title-mode .logo-text h1 {
-    font-size: 1.2rem !important;
-    margin-bottom: 3px !important;
-    letter-spacing: 0.5px;
-}
-
-body.pwa-title-mode .logo-text p {
-    font-size: 0.75rem !important;
-    opacity: 0.9 !important;
-}
-
-body.pwa-title-mode .logo-icon {
-    width: 45px !important;
-    height: 45px !important;
-}
-
-/* Адаптация для маленьких экранов */
-@media (max-width: 480px) {
-    body.pwa-title-mode .logo-text h1 {
-        font-size: 1.1rem !important;
-    }
-    
-    body.pwa-title-mode .logo-text p {
-        font-size: 0.7rem !important;
-    }
-    
-    body.pwa-title-mode .logo-icon {
-        width: 40px !important;
-        height: 40px !important;
-    }
-}
-
-/* Анимация для плавного перехода */
-.logo-text h1,
-.logo-text p,
-.logo-icon {
-    transition: all 0.3s ease;
-}
-
-/* Индикатор PWA режима (опционально) */
-body.pwa-title-mode .header::after {
-    content: '📱';
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 12px;
-    opacity: 0.5;
-}
-
-/* Для темной темы */
-body.dark-theme.pwa-title-mode .logo-text h1 {
-    color: #ffffff;
-}
-
-body.dark-theme.pwa-title-mode .logo-text p {
-    color: #bbbbbb;
-}
     </style>
 </head>
 <body>
-<!-- Оффлайн уведомление -->
-<div class="offline-notification" id="offlineNotification">
-    ⚡ Работаем без интернета
-</div>
-    
-    <div class="container">
-        <!-- Шапка -->
-        <header class="header">
-            <div class="logo">
-                <img src="https://raw.githubusercontent.com/Alivu/alivu.github.io/main/Icon/icon-48x48.png" 
-                     alt="Электро-Калькулятор" class="logo-icon">
-                <div class="logo-text">
-                    <h1><i class="fas fa-bolt"></i> Электро-Калькулятор PRO</h1>
-                    <p>Electric_Group | +7 (963) 598-48-46</p>
-                </div>
-            </div>
-            <div class="stats-container" id="stats">
-                <!-- Статистика -->
-            </div>
-        </header>
-        
-        <!-- Вкладки -->
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('basic')">
-                <i class="fas fa-calculator"></i>
-                <span>Обычный</span>
-            </button>
-            <button class="tab" onclick="showTab('electric')">
-                <i class="fas fa-bolt"></i>
-                <span>Электрика</span>
-            </button>
-            <button class="tab" onclick="showTab('history')">
-                <i class="fas fa-history"></i>
-                <span>История</span>
-            </button>
-            <button class="tab" onclick="showTab('help')">
-                <i class="fas fa-question-circle"></i>
-                <span>Помощь</span>
-            </button>
+
+<div class="calculator-container">
+    <div class="main-card">
+        <div class="card-header">
+            <h2>PRO Калькулятор падения напряжения 
+                <span class="badge-pro">PRO</span>
+            </h2>
+            <p class="mb-0 mt-2">Профессиональный расчет с выбором сечения кабеля и автоматических выключателей</p>
         </div>
         
-        <!-- Обычный калькулятор -->
-        <div class="tab-content active" id="basic">
-            <div class="calc-display">
-                <div class="calc-history" id="calcHistory"></div>
-                <input type="text" class="calc-input" id="calcInput" readonly value="0">
-            </div>
-            
-            <div class="calc-buttons">
-                <button class="calc-btn special" onclick="clearCalc()">C</button>
-                <button class="calc-btn special" onclick="backspaceCalc()">⌫</button>
-                <button class="calc-btn special" onclick="toggleSign()">±</button>
-                <button class="calc-btn operation" onclick="appendToCalc('/')">÷</button>
-                
-                <button class="calc-btn number" onclick="appendToCalc('7')">7</button>
-                <button class="calc-btn number" onclick="appendToCalc('8')">8</button>
-                <button class="calc-btn number" onclick="appendToCalc('9')">9</button>
-                <button class="calc-btn operation" onclick="appendToCalc('*')">×</button>
-                
-                <button class="calc-btn number" onclick="appendToCalc('4')">4</button>
-                <button class="calc-btn number" onclick="appendToCalc('5')">5</button>
-                <button class="calc-btn number" onclick="appendToCalc('6')">6</button>
-                <button class="calc-btn operation" onclick="appendToCalc('-')">−</button>
-                
-                <button class="calc-btn number" onclick="appendToCalc('1')">1</button>
-                <button class="calc-btn number" onclick="appendToCalc('2')">2</button>
-                <button class="calc-btn number" onclick="appendToCalc('3')">3</button>
-                <button class="calc-btn operation" onclick="appendToCalc('+')">+</button>
-                
-                <button class="calc-btn number zero" onclick="appendToCalc('0')">0</button>
-                <button class="calc-btn number" onclick="appendToCalc('.')">.</button>
-                <button class="calc-btn equals" onclick="calculateResult()">=</button>
-            </div>
-            
-            <div class="calc-extra-buttons">
-                <button class="extra-btn" onclick="copyResult()">
-                    <i class="far fa-copy"></i> Копировать
-                </button>
-                <button class="extra-btn" onclick="clearHistory()">
-                    <i class="fas fa-trash-alt"></i> Очистить
-                </button>
-            </div>
-        </div>
-        
-        <!-- Электро калькулятор -->
-        <div class="tab-content" id="electric">
-            <div class="electric-container">
-                <div class="calculator-selector">
-                 <select id="calcType" onchange="changeCalculator()">
-                    <option value="cable">📏 Расчет сечения кабеля</option>
-                    <option value="breaker">⚡ Выбор автомата</option>
-                    <option value="power">🔌 Расчет мощности</option>
-                    <option value="voltage">📉 Падение напряжения</option>
-                    <option value="current">⚡ Расчет тока нагрузки</option>
-                    <option value="ohm">🧮 Закон Ома</option>
-                    <option value="transformer">🔄 Расчет трансформатора</option>
-                    <option value="ground">⛏️ Расчет заземления</option>
-                    <option value="led">💡 Светодиодные ленты</option>
-                    <option value="energy">💸 Стоимость электроэнергии</option>
-                    <option value="cable_length">📐 Максимальная длина кабеля</option>
-                    <option value="motor_current">⚙️ Ток двигателя</option>
-                    <option value="cable_pro">🔧 Расчет сечения кабеля PRO</option>
-                </select>
-                </div>
-                
-                <div class="electric-form" id="calculatorForm">
-                    <!-- Форма будет заполнена JavaScript -->
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="action-btn calculate" onclick="calculate()">
-                        <i class="fas fa-calculator"></i> Рассчитать
-                    </button>
-                    <button class="action-btn reset" onclick="resetForm()">
-                        <i class="fas fa-redo"></i> Сбросить
-                    </button>
-                    <button class="action-btn save" onclick="saveResult()">
-                        <i class="fas fa-save"></i> Сохранить
-                    </button>
-                </div>
-                
-                <div class="results-container" id="results">
-                    <div class="result-header">
-                        <h3><i class="fas fa-chart-line"></i> Результаты</h3>
-                        <button class="extra-btn" onclick="copyResults()" style="padding: 6px 10px; font-size: 0.75rem;">
-                            <i class="far fa-copy"></i> Копировать
-                        </button>
+        <div class="card-body">
+            <form id="calculatorForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="voltage">Напряжение (В):</label>
+                            <select class="form-control" id="voltage" name="voltage">
+                                <option value="12">12 В</option>
+                                <option value="24">24 В</option>
+                                <option value="48">48 В</option>
+                                <option value="110">110 В</option>
+                                <option value="220" selected>220 В</option>
+                                <option value="380">380 В</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="result-content" id="resultContent">
-                        <!-- Результаты -->
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="power">Мощность нагрузки (Вт):</label>
+                            <input type="number" class="form-control" id="power" name="power" 
+                                   placeholder="Введите мощность" value="2000" min="0" step="100">
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- История -->
-        <div class="tab-content" id="history">
-            <div class="history-container" id="historyList">
-                <!-- История -->
-            </div>
-            <div class="calc-extra-buttons">
-                <button class="extra-btn" onclick="clearAllHistory()">
-                    <i class="fas fa-trash-alt"></i> Очистить всё
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="length">Длина линии (м):</label>
+                            <input type="number" class="form-control" id="length" name="length" 
+                                   placeholder="Введите длину" value="50" min="0" step="5">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="material">Материал жил:</label>
+                            <select class="form-control" id="material" name="material">
+                                <option value="copper" selected>Медь</option>
+                                <option value="aluminum">Алюминий</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cableSection">Выберите сечение кабеля (мм²):</label>
+                    <select class="form-control" id="cableSection" name="cableSection">
+                        <option value="1.5">1.5 мм²</option>
+                        <option value="2.5" selected>2.5 мм²</option>
+                        <option value="4">4 мм²</option>
+                        <option value="6">6 мм²</option>
+                        <option value="10">10 мм²</option>
+                        <option value="16">16 мм²</option>
+                        <option value="25">25 мм²</option>
+                        <option value="35">35 мм²</option>
+                        <option value="50">50 мм²</option>
+                        <option value="70">70 мм²</option>
+                        <option value="95">95 мм²</option>
+                        <option value="120">120 мм²</option>
+                        <option value="150">150 мм²</option>
+                        <option value="185">185 мм²</option>
+                        <option value="240">240 мм²</option>
+                    </select>
+                </div>
+                
+                <button type="button" class="btn-calculate" onclick="calculateDrop()">
+                    Рассчитать параметры
                 </button>
-                <button class="extra-btn" onclick="exportHistory()">
-                    <i class="fas fa-download"></i> Экспорт
-                </button>
-            </div>
-        </div>
-        
-        <!-- Помощь -->
-        <div class="tab-content" id="help">
-            <div class="help-section">
-                <h3><i class="fas fa-info-circle"></i> О калькуляторе</h3>
-                <div class="help-item">
-                    <strong>Профессиональный инструмент для электриков</strong>
-                    <p>12 специализированных калькуляторов для точных расчетов в электромонтаже. Все расчеты соответствуют ПУЭ 7.</p>
-                </div>
-            </div>
-            
-            <div class="help-section">
-                <h3><i class="fas fa-bolt"></i> Быстрые подсказки</h3>
-                <div class="help-item">
-                    <strong>Сечение кабеля:</strong>
-                    <p>Медь: 1.5мм² - 16А, 2.5мм² - 25А, 4мм² - 32А, 6мм² - 40А</p>
-                </div>
-                <div class="help-item">
-                    <strong>Автоматы:</strong>
-                    <p>Освещение - тип B, розетки - тип C, двигатели - тип D</p>
-                </div>
-            </div>
-            
-            <div class="help-section">
-                <h3><i class="fas fa-phone-alt"></i> Контакты</h3>
-                <div class="help-item">
-                    <strong>Разработчик:</strong>
-                    <p>Electric_Group | Telegram: @Electric_Group</p>
-                </div>
-                <div class="help-item">
-                    <strong>Телефон:</strong>
-                    <p>+7 (963) 598-48-46</p>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
     
-    <!-- Плавающие кнопки -->
-<div class="bottom-buttons">
-    <button class="float-btn install" onclick="installPWA()" title="Установить приложение" id="installButton" style="display: none;">
-        <i class="fas fa-download"></i>
-    </button>
-    <button class="float-btn refresh" onclick="location.reload()" title="Обновить">
-        <i class="fas fa-redo"></i>
-    </button>
-    <button class="float-btn back" onclick="goBack()" title="Назад">
-        <i class="fas fa-arrow-left"></i>
-    </button>
-</div>
-
-
-    <!-- Модальное окно предупреждения -->
-<div class="warning-modal" id="warningModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-exclamation-triangle"></i> Внимание! Тестовый режим</h3>
+    <div id="result" class="result-card" style="display: none;"></div>
+    <div id="graphContainer" class="graph-container" style="display: none;">
+        <canvas id="voltageGraph" width="400" height="100"></canvas>
+    </div>
+    <div id="historyContainer" class="history-card" style="display: none;">
+        <div class="history-header">
+            <h5>История расчетов</h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="clearHistory()">Очистить</button>
         </div>
-        <div class="modal-body">
-            <p>Этот калькулятор находится на стадии проверки и может содержать ошибки.</p>
-            <p>Используя функционал, вы подтверждаете, что проверяете результаты самостоятельно и принимаете решения на свой страх и риск.</p>
-            <p><strong>Разработчик не несёт ответственности за любые последствия, связанные с использованием калькулятора.</strong></p>
-            
-            <p>Вы можете помочь в улучшении проекта:</p>
-            <ul>
-                <li>протестировать функции как тестировщик и сообщить, что работает неправильно;</li>
-                <li>оставить отзыв в боте обратной связи;</li>
-                <li>написать мне лично по номеру: +7 (963) 598-48-46.</li>
-            </ul>
-            
-            <p>Спасибо за участие в развитии проекта!</p>
-            
-            <div class="checkbox-group">
-                <input type="checkbox" id="acceptWarning" name="acceptWarning">
-                <label for="acceptWarning">Я ознакомился с предупреждением, понимаю, что калькулятор работает в тестовом режиме, и принимаю всю ответственность за применение полученных данных.</label>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="modal-btn accept-btn" id="acceptBtn" disabled>
-                <i class="fas fa-check-circle"></i> Принять и продолжить
-            </button>
-        </div>
+        <div id="historyList"></div>
     </div>
 </div>
+
+<script>
+    // Удельное сопротивление материалов (Ом*мм²/м)
+    const RESISTIVITY = {
+        'copper': 0.0175,
+        'aluminum': 0.028
+    };
     
+    // Таблица допустимых токов для меди и алюминия (А)
+    const CURRENT_TABLE = {
+        'copper': {
+            1.5: 19, 2.5: 27, 4: 36, 6: 46, 10: 63, 16: 85,
+            25: 115, 35: 140, 50: 175, 70: 220, 95: 270,
+            120: 315, 150: 360, 185: 410, 240: 485
+        },
+        'aluminum': {
+            1.5: 15, 2.5: 21, 4: 28, 6: 36, 10: 50, 16: 67,
+            25: 90, 35: 110, 50: 140, 70: 175, 95: 215,
+            120: 250, 150: 290, 185: 330, 240: 390
+        }
+    };
     
-    <script>
-        // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
-        let calcHistory = '';
-        let calcValue = '0';
-        let lastOperation = '';
-        let calculationsHistory = JSON.parse(localStorage.getItem('electricCalcHistory')) || [];
-        let usageStats = JSON.parse(localStorage.getItem('calcStats')) || {
-            totalCalculations: 0,
-            cableCalc: 0,
-            breakerCalc: 0,
-            powerCalc: 0,
-            voltageCalc: 0,
-            currentCalc: 0,
-            cableProCalc: 0,  // ← ДОБАВИТЬ ЭТУ СТРОКУ
-            lastUsed: null
-        };
-        
-        // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
-        function showTab(tabName) {
-            // Скрываем все вкладки
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Убираем активный класс со всех кнопок
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Показываем нужную вкладку
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`.tab[onclick*="${tabName}"]`).classList.add('active');
-            
-            // Дополнительные действия
-            if (tabName === 'history') loadHistory();
-            if (tabName === 'electric') updateStats();
+    // Стандартные номиналы автоматических выключателей (А)
+    const BREAKER_RATINGS = [6, 10, 13, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000];
+    
+    // Типы характеристик автоматов и их применение
+    const BREAKER_CHARACTERISTICS = {
+        'B': 'Для освещения и бытовых нагрузок (3-5 In)',
+        'C': 'Для смешанных нагрузок и небольших моторов (5-10 In)',
+        'D': 'Для мощных моторов и трансформаторов (10-20 In)'
+    };
+    
+    // История расчетов
+    let calculationHistory = [];
+    
+    // Загрузка истории из localStorage при старте
+    function loadHistory() {
+        const saved = localStorage.getItem('calcHistory');
+        if (saved) {
+            calculationHistory = JSON.parse(saved);
+            showHistory();
         }
-        
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#4caf50' : type === 'warning' ? '#ff9800' : '#2196f3'};
-                color: white;
-                padding: 12px 16px;
-                border-radius: 6px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 10000;
-                animation: slideIn 0.3s ease-out;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                max-width: 300px;
-                font-size: 0.85rem;
-            `;
-            
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease-out';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-        
-        function goBack() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.close();
-            }
-        }
-        
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            init();
-            updateStats();
-            loadHistory();
-            changeCalculator();
+    }
+    
+    // Сохранение в историю
+    function saveToHistory(params, results) {
+        calculationHistory.unshift({
+            date: new Date().toLocaleString(),
+            params: params,
+            results: results
         });
         
-        function init() {
-                // Убедимся, что переменные инициализированы
-    if (typeof calcHistory === 'undefined') calcHistory = '';
-    if (typeof calcValue === 'undefined') calcValue = '0';
-    if (typeof lastOperation === 'undefined') lastOperation = '';
-    if (typeof waitingForOperand === 'undefined') waitingForOperand = false;
-            // Обновляем статистику
-            usageStats.lastUsed = new Date().toISOString();
-            usageStats.totalCalculations = calculationsHistory.length;
-            localStorage.setItem('calcStats', JSON.stringify(usageStats));
-            
-  //          // Приветствие
-  //          if (!localStorage.getItem('calcWelcomeShown')) {
-  //              setTimeout(() => {
-  //                  showNotification('Электро-Калькулятор PRO готов к работе! ⚡', 'success');
-  //                  localStorage.setItem('calcWelcomeShown', 'true');
-  //              }, 1000);
-  //          }
+        // Ограничиваем историю 10 записями
+        if (calculationHistory.length > 10) {
+            calculationHistory = calculationHistory.slice(0, 10);
         }
         
-        function updateStats() {
-            const statsContainer = document.getElementById('stats');
-            if (!statsContainer) return;
-            
-            const total = calculationsHistory.length;
-            const today = new Date().toDateString();
-            const todayCount = calculationsHistory.filter(item => 
-                new Date(item.date).toDateString() === today
-            ).length;
-            
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-calculator"></i></div>
-                    <div class="stat-value">${total}</div>
-                    <div class="stat-label">Всего расчетов</div>
+        localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+        showHistory();
+        document.getElementById('historyContainer').style.display = 'block';
+    }
+    
+    // Отображение истории
+    function showHistory() {
+        const historyList = document.getElementById('historyList');
+        if (calculationHistory.length === 0) {
+            historyList.innerHTML = '<p class="text-muted">История расчетов пуста</p>';
+            return;
+        }
+        
+        historyList.innerHTML = calculationHistory.map((item, index) => `
+            <div class="history-item" onclick="loadFromHistory(${index})">
+                <div class="history-date">${item.date}</div>
+                <div class="history-content">
+                    <strong>${item.params.power} Вт</strong> | ${item.params.voltage}В | 
+                    ${item.params.length}м | ${item.params.cableSection}мм² (${item.params.material === 'copper' ? 'Cu' : 'Al'})
+                    <br>
+                    <small>Падение: ${item.results.voltageDropPercent}% | Автомат: ${item.results.breakerCurrent || '—'}A</small>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
-                    <div class="stat-value">${todayCount}</div>
-                    <div class="stat-label">Сегодня</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-bolt"></i></div>
-                    <div class="stat-value">13</div>
-                    <div class="stat-label">Инструментов</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-value">${usageStats.lastUsed ? '✓' : '—'}</div>
-                    <div class="stat-label">Активно</div>
-                </div>
-            `;
-        }
-        
-// ========== ОБЫЧНЫЙ КАЛЬКУЛЯТОР ==========
-function appendToCalc(value) {
-    if (['+', '-', '*', '/'].includes(value)) {
-        // Если это операция и мы уже вводим число, сохраняем его
-        if (calcHistory && calcHistory !== '0' && !waitingForOperand) {
-            // Добавляем текущее значение к истории
-            calcHistory += ' ' + calcValue + ' ' + value;
-        } else if (calcHistory === '' && calcValue !== '0') {
-            // Начинаем новое вычисление
-            calcHistory = calcValue + ' ' + value;
-        } else if (calcHistory.includes('=')) {
-            // Продолжаем с результата предыдущего вычисления
-            const parts = calcHistory.split('=');
-            if (parts.length > 1) {
-                calcHistory = parts[1].trim() + ' ' + value;
-            }
-        } else {
-            // Просто добавляем операцию
-            calcHistory = calcValue + ' ' + value;
-        }
-        
-        document.getElementById('calcHistory').textContent = calcHistory;
-        waitingForOperand = true;
-        lastOperation = value;
-        return;
-    }
-    
-    if (value === '.') {
-        if (calcValue.includes('.')) return;
-        if (calcValue === '0' || waitingForOperand) {
-            calcValue = '0.';
-        } else {
-            calcValue += '.';
-        }
-        waitingForOperand = false;
-        updateDisplay();
-        return;
-    }
-    
-    if (calcValue === '0' || waitingForOperand) {
-        calcValue = value;
-        waitingForOperand = false;
-    } else {
-        calcValue += value;
-    }
-    
-    updateDisplay();
-}
-
-function clearCalc() {
-    calcHistory = '';
-    calcValue = '0';
-    waitingForOperand = false;
-    lastOperation = '';
-    updateDisplay();
-    document.getElementById('calcHistory').textContent = '';
-}
-
-function backspaceCalc() {
-    if (calcValue.length > 1) {
-        calcValue = calcValue.slice(0, -1);
-    } else {
-        calcValue = '0';
-    }
-    updateDisplay();
-}
-
-function toggleSign() {
-    const value = parseFloat(calcValue);
-    if (value !== 0) {
-        calcValue = (-value).toString();
-        updateDisplay();
-    }
-}
-
-function calculateResult() {
-    try {
-        let expression = calcHistory;
-        
-        // Если есть незаконченная операция, добавляем текущее число
-        if (expression && !expression.endsWith(' ') && !expression.includes('=')) {
-            expression += ' ' + calcValue;
-        } else if (expression.includes('=')) {
-            // Если уже был результат, начинаем новое вычисление
-            const parts = expression.split('=');
-            if (parts.length > 1) {
-                expression = parts[1].trim();
-            }
-        } else {
-            // Просто показываем текущее значение
-            expression = calcValue;
-        }
-        
-        // Заменяем символы для eval
-        let evalExpression = expression
-            .replace(/÷/g, '/')
-            .replace(/×/g, '*')
-            .replace(/−/g, '-');
-        
-        // Безопасное вычисление
-        let result;
-        try {
-            // Используем более безопасный метод вычисления
-            result = safeEval(evalExpression);
-        } catch (e) {
-            // Альтернативный метод, если первый не сработал
-            result = Function('"use strict"; return (' + evalExpression + ')')();
-        }
-        
-        // Обрабатываем результат
-        if (isNaN(result) || !isFinite(result)) {
-            throw new Error('Ошибка вычисления');
-        }
-        
-        // Форматируем результат
-        calcValue = formatResult(result);
-        document.getElementById('calcHistory').textContent = expression + ' =';
-        calcHistory = expression + ' = ' + calcValue;
-        waitingForOperand = true;
-        
-        saveSimpleCalculation(expression, calcValue);
-        updateDisplay();
-        
-    } catch (error) {
-        console.error('Calculation error:', error);
-        calcValue = 'Ошибка';
-        calcHistory = '';
-        document.getElementById('calcHistory').textContent = '';
-        updateDisplay();
-        setTimeout(() => {
-            clearCalc();
-            showNotification('Ошибка вычисления', 'warning');
-        }, 1500);
-    }
-}
-
-// Безопасная функция вычисления
-function safeEval(expression) {
-    // Удаляем все пробелы
-    expression = expression.replace(/\s+/g, '');
-    
-    // Проверяем выражение на безопасность
-    if (!/^[\d+\-*/().]*$/.test(expression)) {
-        throw new Error('Недопустимые символы');
-    }
-    
-    // Используем парсер выражений
-    try {
-        // Простой парсер для основных операций
-        return parseFloat(evaluateExpression(expression));
-    } catch (e) {
-        // Если не сработало, пробуем eval с проверкой
-        if (expression.includes('/0')) {
-            throw new Error('Деление на ноль');
-        }
-        return eval(expression);
-    }
-}
-
-// Простой парсер выражений
-function evaluateExpression(expr) {
-    // Обработка скобок
-    while (expr.includes('(') && expr.includes(')')) {
-        const start = expr.lastIndexOf('(');
-        const end = expr.indexOf(')', start);
-        if (end === -1) break;
-        
-        const subExpr = expr.substring(start + 1, end);
-        const result = evaluateSimple(subExpr);
-        expr = expr.substring(0, start) + result + expr.substring(end + 1);
-    }
-    
-    return evaluateSimple(expr);
-}
-
-function evaluateSimple(expr) {
-    // Умножение и деление
-    expr = expr.replace(/(\d*\.?\d+)([*\/])(\d*\.?\d+)/g, (match, a, op, b) => {
-        a = parseFloat(a);
-        b = parseFloat(b);
-        return op === '*' ? (a * b) : (a / b);
-    });
-    
-    // Сложение и вычитание
-    expr = expr.replace(/(\d*\.?\d+)([+\-])(\d*\.?\d+)/g, (match, a, op, b) => {
-        a = parseFloat(a);
-        b = parseFloat(b);
-        return op === '+' ? (a + b) : (a - b);
-    });
-    
-    return parseFloat(expr).toString();
-}
-
-// Форматирование результата
-function formatResult(result) {
-    // Округляем до 8 знаков после запятой
-    let rounded = Math.round(result * 100000000) / 100000000;
-    
-    // Если число целое, убираем .0
-    if (Number.isInteger(rounded)) {
-        return rounded.toString();
-    }
-    
-    // Убираем лишние нули в конце
-    let str = rounded.toString();
-    if (str.includes('.')) {
-        str = str.replace(/(\.\d*?)0+$/, '$1');
-        if (str.endsWith('.')) {
-            str = str.slice(0, -1);
-        }
-    }
-    
-    // Если слишком длинное, используем экспоненциальную запись
-    if (str.length > 12) {
-        return rounded.toExponential(6);
-    }
-    
-    return str;
-}
-
-function updateDisplay() {
-    // Ограничиваем длину отображаемого значения
-    if (calcValue.length > 15) {
-        document.getElementById('calcInput').value = calcValue.substring(0, 12) + '...';
-    } else {
-        document.getElementById('calcInput').value = calcValue;
-    }
-}
-
-function copyResult() {
-    if (calcValue && calcValue !== '0' && calcValue !== 'Ошибка') {
-        navigator.clipboard.writeText(calcValue)
-            .then(() => showNotification('Скопировано!', 'success'))
-            .catch(() => showNotification('Ошибка копирования', 'warning'));
-    }
-}
-
-function clearHistory() {
-    document.getElementById('calcHistory').textContent = '';
-    calcHistory = '';
-    waitingForOperand = false;
-}
-        
-        // ========== ЭЛЕКТРО КАЛЬКУЛЯТОР ==========
-        function changeCalculator() {
-            const calcType = document.getElementById('calcType').value;
-            const formDiv = document.getElementById('calculatorForm');
-            
-            let html = '';
-            
-            switch(calcType) {
-                case 'cable':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность нагрузки (кВт):</label>
-                            <input type="number" id="cablePower" placeholder="3.5" step="0.1" min="0.1" value="3.5">
-                            <small>Суммарная мощность всех приборов в линии</small>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-ruler"></i> Длина линии (м):</label>
-                            <input type="number" id="cableLength" placeholder="25" step="1" min="1" value="25">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение сети:</label>
-                            <select id="cableVoltage">
-                                <option value="220">220В (1 фаза)</option>
-                                <option value="380">380В (3 фазы)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-atom"></i> Материал жилы:</label>
-                            <select id="cableMaterial">
-                                <option value="copper">Медь (Cu)</option>
-                                <option value="aluminum">Алюминий (Al)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-fire"></i> Способ прокладки:</label>
-                            <select id="cableMethod">
-                                <option value="open">Открытая</option>
-                                <option value="closed">Скрытая</option>
-                                <option value="pipe">В трубе</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-thermometer"></i> Температура окружения:</label>
-                            <select id="cableTemp">
-                                <option value="30">До 30°C</option>
-                                <option value="35">До 35°C</option>
-                                <option value="40">До 40°C</option>
-                            </select>
-                        </div>
-                    `;
-                    break;
-                    
-case 'breaker':
-    html = `
-        <div class="form-group">
-            <label><i class="fas fa-bolt"></i> Мощность нагрузки (кВт):</label>
-            <input type="number" id="breakerPower" placeholder="5" step="0.1" min="0.1" value="5">
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-plug"></i> Напряжение сети:</label>
-            <select id="breakerVoltage">
-                <option value="220">220В (1 фаза)</option>
-                <option value="380">380В (3 фазы)</option>
-            </select>
-        </div>
-        <div class="input-group">
-            <div class="form-group">
-                <label><i class="fas fa-cable"></i> Сечение кабеля (мм²):</label>
-                <select id="breakerCable">
-                    <option value="1.5">1.5</option>
-                    <option value="2.5">2.5</option>
-                    <option value="4">4</option>
-                    <option value="6">6</option>
-                    <option value="10">10</option>
-                    <option value="16">16</option>
-                    <option value="25">25</option>
-                    <option value="35">35</option>
-                    <option value="50">50</option>
-                    <option value="70">70</option>
-                </select>
             </div>
-            <div class="form-group">
-                <label><i class="fas fa-atom"></i> Материал:</label>
-                <select id="breakerMaterial">
-                    <option value="copper">Медь</option>
-                    <option value="aluminum">Алюминий</option>
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-ruler"></i> Длина линии (м):</label>
-            <input type="number" id="breakerLength" placeholder="30" step="1" min="1" value="30">
-            <small>Для расчета падения напряжения</small>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-burn"></i> Тип нагрузки:</label>
-            <select id="breakerLoad">
-                <option value="light">Освещение (B)</option>
-                <option value="socket">Розетки (C)</option>
-                <option value="motor">Двигатель (D)</option>
-                <option value="heating">Нагреватель (C)</option>
-                <option value="high_power">Высокая мощность (C/D)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-percentage"></i> Допустимое падение напряжения (%):</label>
-            <select id="breakerVoltageDrop">
-                <option value="3">3% (рекомендуется)</option>
-                <option value="5">5% (максимум по ПУЭ)</option>
-                <option value="8">8% (временные линии)</option>
-            </select>
-        </div>
-    `;
-    break;
-                    
-                case 'current':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность нагрузки (кВт):</label>
-                            <input type="number" id="currentPower" placeholder="3" step="0.1" min="0.1" value="3">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение сети:</label>
-                            <select id="currentVoltage">
-                                <option value="12">12В</option>
-                                <option value="24">24В</option>
-                                <option value="220">220В</option>
-                                <option value="380">380В</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-cos"></i> Коэффициент мощности (cos φ):</label>
-                            <input type="number" id="currentCos" value="0.8" step="0.01" min="0.5" max="1">
-                            <small>Для ламп и нагревателей = 1</small>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-waves"></i> Фазность:</label>
-                            <select id="currentPhase">
-                                <option value="1">1 фаза</option>
-                                <option value="3">3 фазы</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-cable"></i> Сечение кабеля (опционально):</label>
-<select id="currentCable">
-    <option value="">Не учитывать</option>
-    <option value="1.5">1.5 мм²</option>
-    <option value="2.5">2.5 мм²</option>
-    <option value="4">4 мм²</option>
-    <option value="6">6 мм²</option>
-    <option value="10">10 мм²</option>
-    <option value="16">16 мм²</option>
-    <option value="25">25 мм²</option>
-    <option value="35">35 мм²</option>
-    <option value="50">50 мм²</option>
-    <option value="70">70 мм²</option>
-</select>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'voltage':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность (кВт):</label>
-                            <input type="number" id="voltagePower" placeholder="3" step="0.1" min="0.1" value="3">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-ruler"></i> Длина линии (м):</label>
-                            <input type="number" id="voltageLength" placeholder="30" step="1" min="1" value="30">
-                        </div>
-                        <div class="input-group">
-                            <div class="form-group">
-                                <label><i class="fas fa-cable"></i> Сечение (мм²):</label>
-<select id="voltageCable">
-    <option value="1.5">1.5</option>
-    <option value="2.5">2.5</option>
-    <option value="4">4</option>
-    <option value="6">6</option>
-    <option value="10">10</option>
-    <option value="16">16</option>
-    <option value="25">25</option>
-    <option value="35">35</option>
-    <option value="50">50</option>
-    <option value="70">70</option>
-</select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-atom"></i> Материал:</label>
-                                <select id="voltageMaterial">
-                                    <option value="copper">Медь</option>
-                                    <option value="aluminum">Алюминий</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Начальное напряжение (В):</label>
-                            <select id="voltageStart">
-                                <option value="220">220В</option>
-                                <option value="230">230В</option>
-                                <option value="380">380В</option>
-                                <option value="400">400В</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-waves"></i> Фазность:</label>
-                            <select id="voltagePhase">
-                                <option value="1">1 фаза</option>
-                                <option value="3">3 фазы</option>
-                            </select>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'power':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Ток (А):</label>
-                            <input type="number" id="powerCurrent" placeholder="10" step="0.1" min="0.1" value="10">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение (В):</label>
-                            <select id="powerVoltage">
-                                <option value="12">12В</option>
-                                <option value="24">24В</option>
-                                <option value="220">220В</option>
-                                <option value="380">380В</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-cos"></i> Коэффициент мощности (cos φ):</label>
-                            <input type="number" id="powerCos" value="0.8" step="0.01" min="0.5" max="1">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-waves"></i> Фазность:</label>
-                            <select id="powerPhase">
-                                <option value="1">1 фаза</option>
-                                <option value="3">3 фазы</option>
-                            </select>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'ohm':
-                    html = `
-                        <div class="form-group">
-                            <label>Известные параметры:</label>
-                            <select id="ohmKnown" onchange="changeOhmCalc()">
-                                <option value="current">Ток + Сопротивление</option>
-                                <option value="voltage">Напряжение + Сопротивление</option>
-                                <option value="power">Мощность + Напряжение</option>
-                                <option value="power_current">Мощность + Ток</option>
-                            </select>
-                        </div>
-                        <div id="ohmFields">
-                            <!-- Динамические поля -->
-                        </div>
-                    `;
-                    break;
-                    
-                case 'cable_length':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность (кВт):</label>
-                            <input type="number" id="lengthPower" placeholder="3" step="0.1" min="0.1" value="3">
-                        </div>
-                        <div class="input-group">
-                            <div class="form-group">
-                                <label><i class="fas fa-cable"></i> Сечение (мм²):</label>
-<select id="lengthCable">
-    <option value="1.5">1.5</option>
-    <option value="2.5">2.5</option>
-    <option value="4">4</option>
-    <option value="6">6</option>
-    <option value="10">10</option>
-    <option value="16">16</option>
-    <option value="25">25</option>
-    <option value="35">35</option>
-    <option value="50">50</option>
-    <option value="70">70</option>
-</select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="fas fa-atom"></i> Материал:</label>
-                                <select id="lengthMaterial">
-                                    <option value="copper">Медь</option>
-                                    <option value="aluminum">Алюминий</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение (В):</label>
-                            <select id="lengthVoltage">
-                                <option value="220">220В</option>
-                                <option value="380">380В</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-percentage"></i> Макс. потеря напряжения (%):</label>
-                            <select id="lengthLoss">
-                                <option value="3">3%</option>
-                                <option value="5">5%</option>
-                                <option value="8">8%</option>
-                            </select>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'motor_current':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность двигателя (кВт):</label>
-                            <input type="number" id="motorPower" placeholder="5.5" step="0.1" min="0.5" value="5.5">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение сети:</label>
-                            <select id="motorVoltage">
-                                <option value="220">220В (1 фаза)</option>
-                                <option value="380">380В (3 фазы)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-cos"></i> Коэффициент мощности (cos φ):</label>
-                            <input type="number" id="motorCos" value="0.85" step="0.01" min="0.7" max="0.95">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-tachometer-alt"></i> КПД двигателя (%):</label>
-                            <input type="number" id="motorEfficiency" value="85" step="1" min="70" max="95">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Пусковой ток (кратность):</label>
-                            <select id="motorStart">
-                                <option value="5">5× (обычный)</option>
-                                <option value="7">7× (высокий)</option>
-                                <option value="10">10× (очень высокий)</option>
-                            </select>
-                        </div>
-                    `;
-                    break;
-
-                    case 'cable_pro':
-    html = `
-        <div class="calculator-description">
-            <p style="background: #e3f2fd; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem;">
-                <i class="fas fa-info-circle"></i> Профессиональный расчет сечения кабеля по ПУЭ с учетом всех параметров
-            </p>
-        </div>
-        
-        <div class="form-group">
-            <label><i class="fas fa-bolt"></i> Мощность нагрузки (Вт):</label>
-            <input type="number" id="cableProPower" placeholder="1000" step="10" min="10" value="1000">
-            <small>Суммарная мощность всех приборов в линии</small>
-        </div>
-        
-        <div class="form-group">
-            <label><i class="fas fa-exchange-alt"></i> Или ток нагрузки (А):</label>
-            <input type="number" id="cableProCurrent" placeholder="" step="0.1" min="0.1">
-            <small>Оставьте пустым, если указали мощность</small>
-        </div>
-        
-        <div class="input-group">
-            <div class="form-group">
-                <label><i class="fas fa-plug"></i> Напряжение сети:</label>
-                <select id="cableProVoltage">
-                    <option value="12">12В</option>
-                    <option value="24">24В</option>
-                    <option value="127">127В</option>
-                    <option value="220" selected>220В (1 фаза)</option>
-                    <option value="380">380В (3 фазы)</option>
-                    <option value="400">400В (3 фазы)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-waves"></i> Фазность:</label>
-                <select id="cableProPhase">
-                    <option value="1">1 фаза</option>
-                    <option value="3">3 фазы</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="input-group">
-            <div class="form-group">
-                <label><i class="fas fa-ruler"></i> Длина линии (м):</label>
-                <input type="number" id="cableProLength" placeholder="50" step="1" min="1" value="50">
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-atom"></i> Материал жилы:</label>
-                <select id="cableProMaterial">
-                    <option value="copper">Медь (Cu)</option>
-                    <option value="aluminum">Алюминий (Al)</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label><i class="fas fa-fire"></i> Способ прокладки:</label>
-            <select id="cableProMethod">
-                <option value="open">Открытая проводка</option>
-                <option value="closed">Скрытая проводка</option>
-                <option value="pipe2">Два одножильных в трубе</option>
-                <option value="pipe3">Три одножильных в трубе</option>
-                <option value="pipe4">Четыре одножильных в трубе</option>
-                <option value="pipe2c">Один двухжильный в трубе</option>
-                <option value="pipe3c">Один трёхжильный в трубе</option>
-                <option value="tray1">Короб, 1-4 кабеля</option>
-                <option value="tray2">Короб, 5-6 кабелей</option>
-                <option value="tray3">Короб, 7-9 кабелей</option>
-                <option value="tray4">Короб, 10-11 кабелей</option>
-                <option value="tray5">Короб, 12-14 кабелей</option>
-                <option value="tray6">Короб, 15-18 кабелей</option>
-                <option value="tray_many">Короб, более 18 кабелей</option>
-            </select>
-            <small>Влияет на допустимый ток и теплоотвод</small>
-        </div>
-        
-        <div class="input-group">
-            <div class="form-group">
-                <label><i class="fas fa-percentage"></i> Допустимые потери (%):</label>
-                <select id="cableProLoss">
-                    <option value="1">1% (высокие требования)</option>
-                    <option value="2">2%</option>
-                    <option value="3" selected>3% (рекомендуется)</option>
-                    <option value="5">5% (максимум ПУЭ)</option>
-                    <option value="8">8% (временные линии)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-cos"></i> Коэф. мощности (cos φ):</label>
-                <select id="cableProCos">
-                    <option value="1.0">1.0 (лампы, нагреватели)</option>
-                    <option value="0.95" selected>0.95 (бытовая техника)</option>
-                    <option value="0.92">0.92 (стандарт)</option>
-                    <option value="0.85">0.85 (двигатели)</option>
-                    <option value="0.80">0.80 (индуктивные нагрузки)</option>
-                    <option value="0.75">0.75 (сварочные аппараты)</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="input-group">
-            <div class="form-group">
-                <label><i class="fas fa-thermometer"></i> Температура (°C):</label>
-                <select id="cableProTemp">
-                    <option value="15">15°C</option>
-                    <option value="20">20°C</option>
-                    <option value="25">25°C</option>
-                    <option value="30" selected>30°C</option>
-                    <option value="35">35°C (стандарт ПУЭ)</option>
-                    <option value="40">40°C</option>
-                    <option value="45">45°C</option>
-                    <option value="50">50°C</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-layer-group"></i> Количество проводников:</label>
-                <select id="cableProWires">
-                    <option value="1">1 жила</option>
-                    <option value="2" selected>2 жилы</option>
-                    <option value="3">3 жилы</option>
-                    <option value="4">4 жилы</option>
-                    <option value="5">5 жил</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label><i class="fas fa-snowflake"></i> Темп. окружающей среды (°C):</label>
-            <input type="number" id="cableProAmbientTemp" value="25" step="1" min="-40" max="60">
-            <small>Стандартно 25°C. Влияет на допустимый ток</small>
-        </div>
-        
-        <div class="form-group">
-            <label><i class="fas fa-weight"></i> Запас по мощности (%):</label>
-            <select id="cableProMargin">
-                <option value="10">10% (минимальный)</option>
-                <option value="15" selected>15% (рекомендуемый)</option>
-                <option value="20">20% (с запасом)</option>
-                <option value="25">25% (для роста нагрузки)</option>
-                <option value="30">30% (промышленные объекты)</option>
-            </select>
-        </div>
-        
-        <div class="form-actions" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-            <button type="button" class="extra-btn" onclick="calculateCableProDetailed()" style="width: 100%; background: #4caf50;">
-                <i class="fas fa-calculator"></i> Рассчитать детально
-            </button>
-        </div>
-    `;
+        `).join('');
+    }
     
-    // Инициализация зависимых полей
-    setTimeout(() => {
-        const voltageSelect = document.getElementById('cableProVoltage');
-        const phaseSelect = document.getElementById('cableProPhase');
+    // Загрузка из истории
+    function loadFromHistory(index) {
+        const item = calculationHistory[index];
+        document.getElementById('voltage').value = item.params.voltage;
+        document.getElementById('power').value = item.params.power;
+        document.getElementById('length').value = item.params.length;
+        document.getElementById('material').value = item.params.material;
+        document.getElementById('cableSection').value = item.params.cableSection;
+        calculateDrop();
+    }
+    
+    // Очистка истории
+    function clearHistory() {
+        calculationHistory = [];
+        localStorage.removeItem('calcHistory');
+        showHistory();
+        document.getElementById('historyContainer').style.display = 'none';
+    }
+    
+    // Получение максимально допустимого тока по сечению
+    function getMaxCurrent(section, material) {
+        return CURRENT_TABLE[material]?.[section] || 0;
+    }
+    
+    // Рекомендация сечения по току
+    function getRecommendedSection(current, material) {
+        const sections = Object.keys(CURRENT_TABLE[material]).map(Number).sort((a, b) => a - b);
         
-        voltageSelect.addEventListener('change', function() {
-            const voltage = parseInt(this.value);
-            if (voltage === 380 || voltage === 400) {
-                phaseSelect.value = '3';
-            } else {
-                phaseSelect.value = '1';
-            }
-        });
-        
-        // Авторасчет тока при вводе мощности
-        document.getElementById('cableProPower').addEventListener('input', function() {
-            calculateProCurrent();
-        });
-    }, 100);
-    break;
-                    
-                case 'led':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-ruler"></i> Длина ленты (м):</label>
-                            <input type="number" id="ledLength" placeholder="5" step="0.5" min="0.5" value="5">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-lightbulb"></i> Тип светодиодов:</label>
-                            <select id="ledType">
-                                <option value="3528-60">3528 (60 шт/м) - 4.8Вт/м</option>
-                                <option value="3528-120">3528 (120 шт/м) - 9.6Вт/м</option>
-                                <option value="5050-30">5050 (30 шт/м) - 7.2Вт/м</option>
-                                <option value="5050-60">5050 (60 шт/м) - 14.4Вт/м</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение питания:</label>
-                            <select id="ledVoltage">
-                                <option value="12">12В</option>
-                                <option value="24">24В</option>
-                                <option value="220">220В</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-tint"></i> Цвет:</label>
-                            <select id="ledColor">
-                                <option value="white">Белый</option>
-                                <option value="rgb">RGB</option>
-                                <option value="warm">Теплый белый</option>
-                            </select>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'energy':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность прибора (кВт):</label>
-                            <input type="number" id="energyPower" placeholder="1.5" step="0.1" min="0.01" value="1.5">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-clock"></i> Часов в день:</label>
-                            <input type="number" id="energyHours" placeholder="8" step="0.5" min="0.1" max="24" value="8">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> Дней в месяце:</label>
-                            <input type="number" id="energyDays" value="30" step="1" min="1" max="31">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-money-bill-wave"></i> Тариф (руб/кВт·ч):</label>
-                            <input type="number" id="energyTariff" placeholder="5.5" step="0.01" min="0.5" value="5.5">
-                        </div>
-                    `;
-                    break;
-                    
-                default:
-                    html = '<div class="result-item">Выберите тип расчета</div>';
-            }
-            
-            formDiv.innerHTML = html;
-            
-            if (calcType === 'ohm') {
-                changeOhmCalc();
-            }
-            
-            document.getElementById('results').classList.remove('show');
-        }
-        
-        function changeOhmCalc() {
-            const known = document.getElementById('ohmKnown').value;
-            const fieldsDiv = document.getElementById('ohmFields');
-            
-            let html = '';
-            
-            switch(known) {
-                case 'current':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Ток (А):</label>
-                            <input type="number" id="ohmCurrent" placeholder="5" step="0.1" min="0.1" value="5">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-resistance"></i> Сопротивление (Ом):</label>
-                            <input type="number" id="ohmResistance" placeholder="44" step="0.1" min="0.1" value="44">
-                        </div>
-                    `;
-                    break;
-                    
-                case 'voltage':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение (В):</label>
-                            <input type="number" id="ohmVoltage" placeholder="220" step="1" min="1" value="220">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-resistance"></i> Сопротивление (Ом):</label>
-                            <input type="number" id="ohmResistance2" placeholder="100" step="0.1" min="0.1" value="100">
-                        </div>
-                    `;
-                    break;
-                    
-                case 'power':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность (Вт):</label>
-                            <input type="number" id="ohmPower" placeholder="1000" step="10" min="1" value="1000">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Напряжение (В):</label>
-                            <input type="number" id="ohmVoltage2" placeholder="220" step="1" min="1" value="220">
-                        </div>
-                    `;
-                    break;
-                    
-                case 'power_current':
-                    html = `
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Мощность (Вт):</label>
-                            <input type="number" id="ohmPower2" placeholder="1000" step="10" min="1" value="1000">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-bolt"></i> Ток (А):</label>
-                            <input type="number" id="ohmCurrent2" placeholder="5" step="0.1" min="0.1" value="5">
-                        </div>
-                    `;
-                    break;
-            }
-            
-            fieldsDiv.innerHTML = html;
-        }
-        
-        function calculate() {
-            const calcType = document.getElementById('calcType').value;
-            const resultDiv = document.getElementById('results');
-            const resultContent = document.getElementById('resultContent');
-            
-            let resultHTML = '';
-            
-            try {
-                // Обновляем статистику
-                if (usageStats[calcType + 'Calc'] !== undefined) {
-                    usageStats[calcType + 'Calc']++;
-                }
-                localStorage.setItem('calcStats', JSON.stringify(usageStats));
-                
-                switch(calcType) {
-                    case 'cable_pro':
-                        resultHTML = calculateCablePro();
-                        break;
-                    case 'cable':
-                        resultHTML = calculateCable();
-                        break;
-                    case 'breaker':
-                        resultHTML = calculateBreaker();
-                        break;
-                    case 'current':
-                        resultHTML = calculateCurrent();
-                        break;
-                    case 'voltage':
-                        resultHTML = calculateVoltageDrop();
-                        break;
-                    case 'power':
-                        resultHTML = calculatePower();
-                        break;
-                    case 'ohm':
-                        resultHTML = calculateOhm();
-                        break;
-                    case 'cable_length':
-                        resultHTML = calculateCableLength();
-                        break;
-                    case 'motor_current':
-                        resultHTML = calculateMotorCurrent();
-                        break;
-                    case 'led':
-                        resultHTML = calculateLED();
-                        break;
-                    case 'energy':
-                        resultHTML = calculateEnergy();
-                        break;
-                    default:
-                        resultHTML = '<div class="result-item">Расчет в разработке</div>';
-                }
-                
-                resultContent.innerHTML = resultHTML;
-                resultDiv.classList.add('show');
-                
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                
-            } catch (error) {
-                resultContent.innerHTML = `
-                    <div class="result-item danger">
-                        <strong><i class="fas fa-exclamation-triangle"></i> Ошибка!</strong><br>
-                        ${error.message}
-                    </div>
-                `;
-                resultDiv.classList.add('show');
+        for (let section of sections) {
+            if (CURRENT_TABLE[material][section] >= current * 1.1) { // Запас 10%
+                return section;
             }
         }
+        return sections[sections.length - 1];
+    }
+    
+    // Подбор номинала автоматического выключателя
+    function selectBreaker(current, maxCurrent, section) {
+        // Правила выбора автомата:
+        // 1. Номинал автомата должен быть меньше или равен максимальному току кабеля
+        // 2. Номинал автомата должен быть больше или равен рабочему току
+        // 3. Выбираем ближайший стандартный номинал
         
-        // ========== ФУНКЦИИ РАСЧЕТОВ ==========
+        let selectedBreaker = null;
         
-        function calculateCable() {
-            const power = parseFloat(document.getElementById('cablePower').value) || 0;
-            const length = parseFloat(document.getElementById('cableLength').value) || 0;
-            const voltage = parseInt(document.getElementById('cableVoltage').value) || 220;
-            const material = document.getElementById('cableMaterial').value;
-            const method = document.getElementById('cableMethod').value;
-            
-            if (!power || !length) throw new Error('Введите мощность и длину');
-            
-            // Расчет тока
-            let current;
-            if (voltage === 220) {
-                current = (power * 1000) / voltage;
-            } else {
-                current = (power * 1000) / (voltage * Math.sqrt(3));
-            }
-            
-// Таблица допустимых токов (ПУЭ 7) - добавьте большие сечения
-const currentTables = {
-    copper: {
-        open: {
-            1.5: 19, 2.5: 27, 4: 38, 6: 50, 10: 70, 
-            16: 90, 25: 115, 35: 135, 50: 165, 70: 210
-        },
-        closed: {
-            1.5: 15, 2.5: 21, 4: 27, 6: 34, 10: 50, 
-            16: 65, 25: 85, 35: 100, 50: 125, 70: 160
-        },
-        pipe: {
-            1.5: 15, 2.5: 19, 4: 26, 6: 34, 10: 44, 
-            16: 60, 25: 75, 35: 90, 50: 115, 70: 145
-        }
-    },
-    aluminum: {
-        open: {
-            1.5: 15, 2.5: 21, 4: 29, 6: 38, 10: 55, 
-            16: 70, 25: 90, 35: 105, 50: 135, 70: 165
-        },
-        closed: {
-            1.5: 11, 2.5: 16, 4: 21, 6: 26, 10: 38, 
-            16: 50, 25: 65, 35: 75, 50: 95, 70: 120
-        },
-        pipe: {
-            1.5: 11, 2.5: 14, 4: 19, 6: 26, 10: 34, 
-            16: 46, 25: 60, 35: 70, 50: 90, 70: 115
-        }
-    }
-};
-            
-            const table = currentTables[material][method];
-            let recommendedSection = '';
-            let maxCurrent = 0;
-            
-for (const [section, maxCurr] of Object.entries(table)) {
-    if (maxCurr >= current * 1.1) {
-        recommendedSection = section;
-        maxCurrent = maxCurr;
-        break;
-    }
-}
-
-if (!recommendedSection) {
-    // Проверяем большие сечения
-    const sections = [25, 35, 50, 70];
-    for (const section of sections) {
-        if (table[section] && table[section] >= current * 1.1) {
-            recommendedSection = section.toString();
-            maxCurrent = table[section];
-            break;
-        }
-    }
-    
-    if (!recommendedSection) {
-        recommendedSection = '70+';
-        maxCurrent = table[70] || 210;
-    }
-}
-            
-            // Расчет потери напряжения
-            const resistivity = material === 'copper' ? 0.0175 : 0.028;
-            const sectionNum = parseFloat(recommendedSection) || 25;
-            let voltageDrop;
-            
-            if (voltage === 220) {
-                voltageDrop = (2 * current * length * resistivity) / sectionNum;
-            } else {
-                voltageDrop = (Math.sqrt(3) * current * length * resistivity) / sectionNum;
-            }
-            
-            const voltageDropPercent = (voltageDrop / voltage) * 100;
-            const maxPower = (maxCurrent * voltage * (voltage === 380 ? Math.sqrt(3) : 1)) / 1000;
-            
-            let html = `
-                <div class="result-item">
-                    <strong>Расчетный ток:</strong> ${current.toFixed(1)} А
-                </div>
-                <div class="result-item success">
-                    <strong>Рекомендуемое сечение:</strong> ${recommendedSection} мм²
-                </div>
-                <div class="result-item">
-                    <strong>Максимальный ток для кабеля:</strong> ${maxCurrent} А
-                </div>
-                <div class="result-item">
-                    <strong>Максимальная мощность:</strong> ${maxPower.toFixed(1)} кВт
-                </div>
-                <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}">
-                    <strong>Потеря напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
-                    ${voltageDropPercent > 5 ? ' ⚠️ Превышение ПУЭ!' : voltageDropPercent > 3 ? ' ⚠️ Близко к пределу' : ' ✅ Норма'}
-                </div>
-            `;
-            
-            if (voltageDropPercent > 5) {
-                const newSection = Math.ceil(sectionNum * (voltageDropPercent / 3));
-                html += `<div class="result-item warning">
-                    <strong>Рекомендация:</strong> Увеличьте сечение до ${newSection} мм²
-                </div>`;
-            }
-            
-            return html;
-        }
-        
-function calculateBreaker() {
-    const power = parseFloat(document.getElementById('breakerPower').value) || 0;
-    const voltage = parseInt(document.getElementById('breakerVoltage').value) || 220;
-    const cableSection = parseFloat(document.getElementById('breakerCable').value) || 2.5;
-    const material = document.getElementById('breakerMaterial').value;
-    const loadType = document.getElementById('breakerLoad').value;
-    const length = parseFloat(document.getElementById('breakerLength').value) || 30;
-    const maxVoltageDropPercent = parseFloat(document.getElementById('breakerVoltageDrop').value) || 5;
-    
-    if (!power) throw new Error('Введите мощность');
-    if (!length) throw new Error('Введите длину линии');
-    
-    // Расчет тока
-    let current;
-    if (voltage === 220) {
-        current = (power * 1000) / voltage;
-    } else {
-        current = (power * 1000) / (voltage * Math.sqrt(3));
-    }
-    
-    // Коэффициенты для разных типов нагрузок
-    const loadCoefficients = {
-        light: 1.0, 
-        socket: 1.1, 
-        motor: 1.5, 
-        heating: 1.0,
-        high_power: 1.2
-    };
-    
-    const coefficient = loadCoefficients[loadType] || 1.0;
-    const designCurrent = current * coefficient;
-    
-    // Максимальные токи для кабелей по ПУЭ 7 (с увеличенными сечениями)
-    const cableCurrents = {
-        copper: {
-            1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50, 
-            16: 63, 25: 80, 35: 100, 50: 125, 70: 160
-        },
-        aluminum: {
-            1.5: 12, 2.5: 19, 4: 25, 6: 32, 10: 40, 
-            16: 50, 25: 65, 35: 80, 50: 100, 70: 125
-        }
-    };
-    
-    const maxCableCurrent = cableCurrents[material][cableSection] || 160;
-    
-    // Стандартные номиналы автоматов (добавлены большие значения)
-    const breakerRatings = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160];
-    
-    // Подбор автомата по расчетному току
-    let recommendedBreaker = 0;
-    for (const rating of breakerRatings) {
-        if (rating >= designCurrent && rating <= maxCableCurrent * 0.9) {
-            recommendedBreaker = rating;
-            break;
-        }
-    }
-    
-    // Если не нашли подходящий, берем максимальный допустимый для кабеля
-    if (!recommendedBreaker && designCurrent <= maxCableCurrent * 0.9) {
-        for (let i = breakerRatings.length - 1; i >= 0; i--) {
-            if (breakerRatings[i] <= maxCableCurrent * 0.9) {
-                recommendedBreaker = breakerRatings[i];
-                break;
-            }
-        }
-    }
-    
-    // Тип автомата
-    let breakerType = 'B';
-    if (loadType === 'motor') breakerType = 'D';
-    else if (loadType === 'socket') breakerType = 'C';
-    else if (loadType === 'high_power') breakerType = designCurrent > 63 ? 'D' : 'C';
-    else if (designCurrent > 32) breakerType = 'C';
-    
-    // Расчет падения напряжения
-    const resistivity = material === 'copper' ? 0.0175 : 0.028;
-    let voltageDrop;
-    
-    if (voltage === 220) {
-        voltageDrop = (2 * current * length * resistivity) / cableSection;
-    } else {
-        voltageDrop = (Math.sqrt(3) * current * length * resistivity) / cableSection;
-    }
-    
-    const voltageDropPercent = (voltageDrop / voltage) * 100;
-    const maxVoltageDrop = voltage * (maxVoltageDropPercent / 100);
-    
-    // Проверка сечения по падению напряжения
-    let voltageDropOk = voltageDrop <= maxVoltageDrop;
-    let requiredSectionByVoltage = cableSection;
-    
-    if (!voltageDropOk) {
-        if (voltage === 220) {
-            requiredSectionByVoltage = (2 * current * length * resistivity) / maxVoltageDrop;
-        } else {
-            requiredSectionByVoltage = (Math.sqrt(3) * current * length * resistivity) / maxVoltageDrop;
-        }
-        requiredSectionByVoltage = Math.ceil(requiredSectionByVoltage);
-    }
-    
-    // Поиск ближайшего стандартного сечения
-    const standardSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70];
-    let actualRequiredSection = cableSection;
-    for (const section of standardSections) {
-        if (section >= requiredSectionByVoltage) {
-            actualRequiredSection = section;
-            break;
-        }
-    }
-    
-    // Формирование результатов
-    let html = `
-        <div class="result-item">
-            <strong>Расчетный ток:</strong> ${current.toFixed(1)} А
-        </div>
-        <div class="result-item">
-            <strong>Ток с коэффициентом (${loadType}):</strong> ${designCurrent.toFixed(1)} А
-        </div>
-    `;
-    
-    if (recommendedBreaker > 0) {
-        html += `<div class="result-item success">
-            <strong>Рекомендуемый автомат:</strong> ${recommendedBreaker}А тип ${breakerType}
-        </div>`;
-    } else {
-        html += `<div class="result-item danger">
-            <strong>⚠️ Нет подходящего автомата!</strong> Увеличьте сечение кабеля
-        </div>`;
-    }
-    
-    html += `
-        <div class="result-item">
-            <strong>Кабель:</strong> ${cableSection} мм² ${material} (макс. ${maxCableCurrent}А)
-        </div>
-        <div class="result-item ${voltageDropOk ? 'success' : 'danger'}">
-            <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
-            ${voltageDropOk ? ' ✅' : ' ⚠️ Превышено!'}
-        </div>
-    `;
-    
-    // Предупреждения
-    if (designCurrent > maxCableCurrent) {
-        html += `<div class="result-item danger">
-            <strong>⚠️ ОПАСНО!</strong> Кабель ${cableSection} мм² не выдержит нагрузку!
-            Нужен минимум ${actualRequiredSection} мм²
-        </div>`;
-    }
-    
-    if (!voltageDropOk) {
-        html += `<div class="result-item warning">
-            <strong>⚠️ Большое падение напряжения!</strong> 
-            Для соблюдения нормы ${maxVoltageDropPercent}% нужно сечение ${actualRequiredSection} мм²
-        </div>`;
-    }
-    
-    // Рекомендации по выбору
-    if (recommendedBreaker > 0) {
-        html += `<div class="result-item info">
-            <strong>Рекомендации:</strong>
-            <ul style="margin-left: 20px; margin-top: 5px;">
-                <li>Автомат ${recommendedBreaker}А тип ${breakerType}</li>
-                <li>Кабель ${Math.max(cableSection, actualRequiredSection)} мм² ${material}</li>
-                <li>Длина: ${length} м (падение ${voltageDropPercent.toFixed(1)}%)</li>
-            </ul>
-        </div>`;
-    }
-    
-    return html;
-}
-        
-function calculateCurrent() {
-    const power = parseFloat(document.getElementById('currentPower').value) || 0;
-    const voltage = parseInt(document.getElementById('currentVoltage').value) || 220;
-    const cosPhi = parseFloat(document.getElementById('currentCos').value) || 1;
-    const phase = parseInt(document.getElementById('currentPhase').value) || 1;
-    const cableSection = document.getElementById('currentCable').value;
-    
-    if (!power) throw new Error('Введите мощность');
-    
-    let current;
-    if (phase === 1) {
-        current = (power * 1000) / (voltage * cosPhi);
-    } else {
-        current = (power * 1000) / (Math.sqrt(3) * voltage * cosPhi);
-    }
-    
-    // Полная таблица токов для кабелей (медь, открытая прокладка)
-    const cableCurrents = {
-        1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
-        16: 63, 25: 80, 35: 100, 50: 125, 70: 160
-    };
-    
-    // Рекомендации по кабелю
-    let recommendedCable = '';
-    if (current <= 16) {
-        recommendedCable = '1.5-2.5 мм² (медь)';
-    } else if (current <= 25) {
-        recommendedCable = '2.5-4 мм² (медь)';
-    } else if (current <= 32) {
-        recommendedCable = '4-6 мм² (медь)';
-    } else if (current <= 40) {
-        recommendedCable = '6-10 мм² (медь)';
-    } else if (current <= 50) {
-        recommendedCable = '10 мм² (медь)';
-    } else if (current <= 63) {
-        recommendedCable = '10-16 мм² (медь)';
-    } else if (current <= 80) {
-        recommendedCable = '16-25 мм² (медь)';
-    } else if (current <= 100) {
-        recommendedCable = '25-35 мм² (медь)';
-    } else if (current <= 125) {
-        recommendedCable = '35-50 мм² (медь)';
-    } else if (current <= 160) {
-        recommendedCable = '50-70 мм² (медь)';
-    } else {
-        recommendedCable = '70+ мм² (медь) или несколько линий';
-    }
-    
-    let html = `
-        <div class="result-item success">
-            <strong>Расчетный ток нагрузки:</strong> ${current.toFixed(1)} А
-        </div>
-        <div class="result-item">
-            <strong>Напряжение:</strong> ${voltage}В (${phase === 3 ? '3 фазы' : '1 фаза'})
-        </div>
-        <div class="result-item">
-            <strong>Коэффициент мощности:</strong> ${cosPhi}
-        </div>
-        <div class="result-item info">
-            <strong>Рекомендуемое сечение кабеля (медь, открытая):</strong> ${recommendedCable}
-        </div>
-    `;
-    
-    // Проверка выбранного кабеля
-    if (cableSection) {
-        const maxCurrent = cableCurrents[cableSection] || 0;
-        if (maxCurrent > 0) {
-            const safetyMargin = maxCurrent * 0.9; // 10% запас
-            
-            if (current > safetyMargin) {
-                html += `<div class="result-item ${current > maxCurrent ? 'danger' : 'warning'}">
-                    <strong>${current > maxCurrent ? '⚠️ ОПАСНО!' : '⚠️ Внимание!'}</strong> 
-                    Кабель ${cableSection} мм² ${current > maxCurrent ? 'не подходит!' : 'близок к пределу!'}<br>
-                    Макс. ток: ${maxCurrent}А (рекомендуемый запас: ${safetyMargin.toFixed(1)}А)
-                </div>`;
-            } else {
-                html += `<div class="result-item success">
-                    <strong>✅ Кабель ${cableSection} мм² подходит</strong><br>
-                    Макс. ток: ${maxCurrent}А (запас ${(safetyMargin - current).toFixed(1)}А)
-                </div>`;
-            }
-        }
-    }
-    
-    // Для больших токов - рекомендация по фазности
-    if (current > 100 && voltage === 220) {
-        html += `<div class="result-item warning">
-            <strong>Рекомендация:</strong> Для мощности ${power} кВт рекомендуется 380В (3 фазы)
-        </div>`;
-    }
-    
-    return html;
-}
-        
-function calculateVoltageDrop() {
-    const power = parseFloat(document.getElementById('voltagePower').value) || 0;
-    const length = parseFloat(document.getElementById('voltageLength').value) || 0;
-    const cableSection = parseFloat(document.getElementById('voltageCable').value) || 2.5;
-    const material = document.getElementById('voltageMaterial').value;
-    const startVoltage = parseInt(document.getElementById('voltageStart').value) || 220;
-    const phase = parseInt(document.getElementById('voltagePhase').value) || 1;
-    
-    if (!power || !length) throw new Error('Введите мощность и длину');
-    
-    // Расчет тока
-    let current;
-    if (phase === 1) {
-        current = (power * 1000) / startVoltage;
-    } else {
-        current = (power * 1000) / (Math.sqrt(3) * startVoltage);
-    }
-    
-    // Сопротивление
-    const resistivity = material === 'copper' ? 0.0175 : 0.028;
-    let voltageDrop;
-    
-    if (phase === 1) {
-        voltageDrop = (2 * current * length * resistivity) / cableSection;
-    } else {
-        voltageDrop = (Math.sqrt(3) * current * length * resistivity) / cableSection;
-    }
-    
-    const voltageDropPercent = (voltageDrop / startVoltage) * 100;
-    const endVoltage = startVoltage - voltageDrop;
-    
-    // Максимальные токи для кабелей (для информации)
-    const cableCurrents = {
-        copper: {
-            1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
-            16: 63, 25: 80, 35: 100, 50: 125, 70: 160
-        },
-        aluminum: {
-            1.5: 12, 2.5: 19, 4: 25, 6: 32, 10: 40,
-            16: 50, 25: 65, 35: 80, 50: 100, 70: 125
-        }
-    };
-    
-    const maxCurrent = cableCurrents[material][cableSection] || 160;
-    const currentPercent = (current / maxCurrent) * 100;
-    
-    let html = `
-        <div class="result-item">
-            <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А (${currentPercent.toFixed(1)}% от макс.)
-        </div>
-        <div class="result-item">
-            <strong>Начальное напряжение:</strong> ${startVoltage} В
-        </div>
-        <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}">
-            <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(1)} В (${voltageDropPercent.toFixed(1)}%)
-        </div>
-        <div class="result-item">
-            <strong>Конечное напряжение:</strong> ${endVoltage.toFixed(1)} В
-        </div>
-        <div class="result-item">
-            <strong>Кабель:</strong> ${cableSection} мм² ${material} (макс. ${maxCurrent}А)
-        </div>
-    `;
-    
-    if (voltageDropPercent > 5) {
-        const newSection = Math.ceil(cableSection * (voltageDropPercent / 3));
-        // Ищем ближайшее стандартное сечение
-        const standardSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70];
-        let recommendedSection = cableSection;
-        for (const section of standardSections) {
-            if (section >= newSection) {
-                recommendedSection = section;
+        for (let rating of BREAKER_RATINGS) {
+            if (rating >= current && rating <= maxCurrent) {
+                selectedBreaker = rating;
                 break;
             }
         }
         
-        html += `<div class="result-item danger">
-            <strong>⚠️ Превышение нормы ПУЭ (5%)!</strong> Увеличьте сечение до ${recommendedSection} мм²
-        </div>`;
-    } else if (voltageDropPercent > 3) {
-        const recommendedSection = Math.ceil(cableSection * 1.5);
-        html += `<div class="result-item warning">
-            <strong>⚠️ Близко к пределу.</strong> Рекомендуется сечение ${recommendedSection} мм²
-        </div>`;
-    }
-    
-    // Проверка по току
-    if (current > maxCurrent * 0.9) {
-        html += `<div class="result-item ${current > maxCurrent ? 'danger' : 'warning'}">
-            <strong>${current > maxCurrent ? '⚠️ ОПАСНО!' : '⚠️ Внимание!'}</strong>
-            Ток ${current.toFixed(1)}А ${current > maxCurrent ? 'превышает' : 'близок к'} макс. ${maxCurrent}А
-        </div>`;
-    }
-    
-    return html;
-}
-        
-        function calculatePower() {
-            const current = parseFloat(document.getElementById('powerCurrent').value) || 0;
-            const voltage = parseInt(document.getElementById('powerVoltage').value) || 220;
-            const cosPhi = parseFloat(document.getElementById('powerCos').value) || 1;
-            const phase = parseInt(document.getElementById('powerPhase').value) || 1;
-            
-            if (!current) throw new Error('Введите ток');
-            
-            let apparentPower, activePower, reactivePower;
-            
-            if (phase === 1) {
-                apparentPower = current * voltage;
-                activePower = apparentPower * cosPhi;
-                reactivePower = Math.sqrt(apparentPower ** 2 - activePower ** 2);
+        // Если не нашли подходящий (ток слишком маленький или большой)
+        if (!selectedBreaker) {
+            if (current > maxCurrent) {
+                // Ток превышает допустимый для кабеля
+                selectedBreaker = BREAKER_RATINGS.find(r => r <= maxCurrent) || maxCurrent;
             } else {
-                apparentPower = Math.sqrt(3) * current * voltage;
-                activePower = apparentPower * cosPhi;
-                reactivePower = Math.sqrt(apparentPower ** 2 - activePower ** 2);
-            }
-            
-            let html = `
-                <div class="result-item">
-                    <strong>Полная мощность (S):</strong> ${(apparentPower/1000).toFixed(2)} кВА
-                </div>
-                <div class="result-item success">
-                    <strong>Активная мощность (P):</strong> ${(activePower/1000).toFixed(2)} кВт
-                </div>
-                <div class="result-item">
-                    <strong>Реактивная мощность (Q):</strong> ${(reactivePower/1000).toFixed(2)} кВар
-                </div>
-                <div class="result-item">
-                    <strong>Коэффициент мощности:</strong> ${cosPhi}
-                </div>
-            `;
-            
-            if (cosPhi < 0.8) {
-                html += `<div class="result-item warning">
-                    <strong>⚠️ Низкий cos φ!</strong> Рекомендуется компенсация
-                </div>`;
-            }
-            
-            return html;
-        }
-        
-        function calculateOhm() {
-            const known = document.getElementById('ohmKnown').value;
-            
-            let voltage, current, resistance, power;
-            
-            try {
-                switch(known) {
-                    case 'current':
-                        current = parseFloat(document.getElementById('ohmCurrent').value) || 0;
-                        resistance = parseFloat(document.getElementById('ohmResistance').value) || 0;
-                        if (!current || !resistance) throw new Error('Введите ток и сопротивление');
-                        voltage = current * resistance;
-                        power = current * voltage;
-                        break;
-                        
-                    case 'voltage':
-                        voltage = parseFloat(document.getElementById('ohmVoltage').value) || 0;
-                        resistance = parseFloat(document.getElementById('ohmResistance2').value) || 0;
-                        if (!voltage || !resistance) throw new Error('Введите напряжение и сопротивление');
-                        current = voltage / resistance;
-                        power = current * voltage;
-                        break;
-                        
-                    case 'power':
-                        power = parseFloat(document.getElementById('ohmPower').value) || 0;
-                        voltage = parseFloat(document.getElementById('ohmVoltage2').value) || 0;
-                        if (!power || !voltage) throw new Error('Введите мощность и напряжение');
-                        current = power / voltage;
-                        resistance = voltage / current;
-                        break;
-                        
-                    case 'power_current':
-                        power = parseFloat(document.getElementById('ohmPower2').value) || 0;
-                        current = parseFloat(document.getElementById('ohmCurrent2').value) || 0;
-                        if (!power || !current) throw new Error('Введите мощность и ток');
-                        voltage = power / current;
-                        resistance = voltage / current;
-                        break;
-                }
-                
-                return `
-                    <div class="result-item">
-                        <strong>Напряжение (U):</strong> ${voltage.toFixed(1)} В
-                    </div>
-                    <div class="result-item">
-                        <strong>Ток (I):</strong> ${current.toFixed(2)} А
-                    </div>
-                    <div class="result-item">
-                        <strong>Сопротивление (R):</strong> ${resistance.toFixed(1)} Ом
-                    </div>
-                    <div class="result-item">
-                        <strong>Мощность (P):</strong> ${(power/1000).toFixed(2)} кВт
-                    </div>
-                    <div class="result-item info">
-                        <strong>Формулы:</strong> U = I × R | I = U ÷ R | R = U ÷ I | P = U × I
-                    </div>
-                `;
-                
-            } catch (error) {
-                throw new Error(error.message);
+                // Для очень маленьких токов
+                selectedBreaker = BREAKER_RATINGS[0];
             }
         }
         
-function calculateCableLength() {
-    const power = parseFloat(document.getElementById('lengthPower').value) || 0;
-    const cableSection = parseFloat(document.getElementById('lengthCable').value) || 2.5;
-    const material = document.getElementById('lengthMaterial').value;
-    const voltage = parseInt(document.getElementById('lengthVoltage').value) || 220;
-    const maxLoss = parseFloat(document.getElementById('lengthLoss').value) || 5;
-    
-    if (!power) throw new Error('Введите мощность');
-    
-    // Расчет тока
-    const current = (power * 1000) / voltage;
-    
-    // Максимальное падение напряжения
-    const maxVoltageDrop = voltage * (maxLoss / 100);
-    
-    // Расчет максимальной длины
-    const resistivity = material === 'copper' ? 0.0175 : 0.028;
-    const maxLength = (maxVoltageDrop * cableSection) / (2 * current * resistivity);
-    
-    // Проверка максимального тока для кабеля
-    const cableCurrents = {
-        copper: {
-            1.5: 16, 2.5: 25, 4: 32, 6: 40, 10: 50,
-            16: 63, 25: 80, 35: 100, 50: 125, 70: 160
-        },
-        aluminum: {
-            1.5: 12, 2.5: 19, 4: 25, 6: 32, 10: 40,
-            16: 50, 25: 65, 35: 80, 50: 100, 70: 125
-        }
-    };
-    
-    const maxCableCurrent = cableCurrents[material][cableSection] || 160;
-    const currentSafety = maxCableCurrent * 0.9; // 10% запас
-    
-    // Рекомендация по сечению
-    let recommendedSection = '';
-    if (current > currentSafety) {
-        const standardSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70];
-        for (const section of standardSections) {
-            const sectionCurrent = cableCurrents[material][section] || 0;
-            if (sectionCurrent >= current * 1.1) {
-                recommendedSection = section;
-                break;
-            }
-        }
+        return selectedBreaker;
     }
     
-    let html = `
-        <div class="result-item">
-            <strong>Ток нагрузки:</strong> ${current.toFixed(1)} А
-        </div>
-        <div class="result-item">
-            <strong>Кабель:</strong> ${cableSection} мм² ${material} (макс. ${maxCableCurrent}А)
-        </div>
-        <div class="result-item success">
-            <strong>Максимальная длина (при потере ${maxLoss}%):</strong> ${maxLength.toFixed(1)} м
-        </div>
-        <div class="result-item">
-            <strong>Рекомендуемая длина (с запасом):</strong> ${(maxLength * 0.8).toFixed(1)} м
-        </div>
-    `;
-    
-    if (current > maxCableCurrent) {
-        html += `<div class="result-item danger">
-            <strong>⚠️ Превышен максимальный ток кабеля!</strong>
-            Нужно минимум ${recommendedSection || 'больше'} мм²
-        </div>`;
-    } else if (current > currentSafety) {
-        html += `<div class="result-item warning">
-            <strong>⚠️ Ток близок к пределу.</strong>
-            Рекомендуется ${recommendedSection || 'большее'} мм²
-        </div>`;
-    }
-    
-    if (maxLength < 10) {
-        html += `<div class="result-item warning">
-            <strong>⚠️ Слишком маленькая длина!</strong> 
-            Увеличьте сечение кабеля или уменьшите мощность
-        </div>`;
-    }
-    
-    // Для больших мощностей
-    if (power > 10 && voltage === 220) {
-        html += `<div class="result-item info">
-            <strong>Рекомендация:</strong> Для мощности ${power} кВт используйте 380В
-        </div>`;
-    }
-    
-    return html;
-}
+    // Определение рекомендуемой характеристики автомата
+    function getRecommendedCharacteristic(power, voltage) {
+        const current = power / voltage;
         
-        function calculateMotorCurrent() {
-            const power = parseFloat(document.getElementById('motorPower').value) || 0;
-            const voltage = parseInt(document.getElementById('motorVoltage').value) || 380;
-            const cosPhi = parseFloat(document.getElementById('motorCos').value) || 0.85;
-            const efficiency = parseFloat(document.getElementById('motorEfficiency').value) || 85;
-            const startMultiplier = parseFloat(document.getElementById('motorStart').value) || 5;
-            
-            if (!power) throw new Error('Введите мощность двигателя');
-            
-            // Номинальный ток
-            let nominalCurrent;
-            if (voltage === 220) {
-                nominalCurrent = (power * 1000) / (voltage * cosPhi * (efficiency/100));
-            } else {
-                nominalCurrent = (power * 1000) / (Math.sqrt(3) * voltage * cosPhi * (efficiency/100));
-            }
-            
-            // Пусковой ток
-            const startCurrent = nominalCurrent * startMultiplier;
-            
-            // Рекомендации по автомату
-            let recommendedBreaker = Math.ceil(nominalCurrent * 1.25);
-            if (recommendedBreaker < 16) recommendedBreaker = 16;
-            
-// Рекомендации по кабелю
-let recommendedCable = '';
-if (nominalCurrent <= 16) recommendedCable = '2.5 мм² (медь)';
-else if (nominalCurrent <= 25) recommendedCable = '4 мм² (медь)';
-else if (nominalCurrent <= 35) recommendedCable = '6 мм² (медь)';
-else if (nominalCurrent <= 50) recommendedCable = '10 мм² (медь)';
-else if (nominalCurrent <= 63) recommendedCable = '16 мм² (медь)';
-else if (nominalCurrent <= 80) recommendedCable = '25 мм² (медь)';
-else if (nominalCurrent <= 100) recommendedCable = '35 мм² (медь)';
-else if (nominalCurrent <= 125) recommendedCable = '50 мм² (медь)';
-else if (nominalCurrent <= 160) recommendedCable = '70 мм² (медь)';
-else recommendedCable = '70+ мм² (медь) или несколько линий';
-            
-            return `
-                <div class="result-item">
-                    <strong>Номинальный ток:</strong> ${nominalCurrent.toFixed(1)} А
-                </div>
-                <div class="result-item warning">
-                    <strong>Пусковой ток (${startMultiplier}×):</strong> ${startCurrent.toFixed(1)} А
-                </div>
-                <div class="result-item success">
-                    <strong>Рекомендуемый автомат:</strong> ${recommendedBreaker}А тип D
-                </div>
-                <div class="result-item">
-                    <strong>Рекомендуемый кабель:</strong> ${recommendedCable}
-                </div>
-                <div class="result-item">
-                    <strong>Напряжение:</strong> ${voltage}В
-                </div>
-                <div class="result-item">
-                    <strong>КПД:</strong> ${efficiency}%
-                </div>
-            `;
-        }
+        // Для бытовых нагрузок обычно используют характеристику C
+        // Для освещения - B
+        // Для мощных моторов - D
         
-        function calculateLED() {
-            const length = parseFloat(document.getElementById('ledLength').value) || 0;
-            const ledType = document.getElementById('ledType').value;
-            const voltage = parseInt(document.getElementById('ledVoltage').value) || 12;
-            
-            if (!length) throw new Error('Введите длину ленты');
-            
-            // Мощность на метр
-            const powerPerMeter = {
-                '3528-60': 4.8,
-                '3528-120': 9.6,
-                '5050-30': 7.2,
-                '5050-60': 14.4
-            };
-            
-            const wattPerMeter = powerPerMeter[ledType] || 12;
-            const totalPower = length * wattPerMeter;
-            const current = totalPower / voltage;
-            const recommendedPower = totalPower * 1.2;
-            
-            // Рекомендации по подключению
-            let connectionAdvice = '';
-            if (voltage === 12 && length > 5) {
-                connectionAdvice = 'Подключайте с двух сторон!';
-            }
-            
-            return `
-                <div class="result-item">
-                    <strong>Мощность ленты:</strong> ${wattPerMeter} Вт/м
-                </div>
-                <div class="result-item">
-                    <strong>Общая мощность:</strong> ${totalPower.toFixed(1)} Вт
-                </div>
-                <div class="result-item success">
-                    <strong>Ток потребления:</strong> ${current.toFixed(1)} А
-                </div>
-                <div class="result-item">
-                    <strong>Рекомендуемый блок питания:</strong> ${Math.ceil(recommendedPower)} Вт
-                </div>
-                <div class="result-item">
-                    <strong>Напряжение питания:</strong> ${voltage}В
-                </div>
-                ${connectionAdvice ? `<div class="result-item warning">${connectionAdvice}</div>` : ''}
-            `;
-        }
-        
-        function calculateEnergy() {
-            const power = parseFloat(document.getElementById('energyPower').value) || 0;
-            const hours = parseFloat(document.getElementById('energyHours').value) || 0;
-            const days = parseInt(document.getElementById('energyDays').value) || 30;
-            const tariff = parseFloat(document.getElementById('energyTariff').value) || 0;
-            
-            if (!power || !hours || !tariff) {
-                throw new Error('Заполните все поля');
-            }
-            
-            const dailyConsumption = power * hours;
-            const monthlyConsumption = dailyConsumption * days;
-            const dailyCost = dailyConsumption * tariff;
-            const monthlyCost = monthlyConsumption * tariff;
-            const yearlyCost = monthlyCost * 12;
-            
-            return `
-                <div class="result-item">
-                    <strong>Потребление в день:</strong> ${dailyConsumption.toFixed(2)} кВт·ч
-                </div>
-                <div class="result-item">
-                    <strong>Потребление в месяц:</strong> ${monthlyConsumption.toFixed(2)} кВт·ч
-                </div>
-                <div class="result-item warning">
-                    <strong>Стоимость в день:</strong> ${dailyCost.toFixed(2)} руб.
-                </div>
-                <div class="result-item danger">
-                    <strong>Стоимость в месяц:</strong> ${monthlyCost.toFixed(2)} руб.
-                </div>
-                <div class="result-item">
-                    <strong>Стоимость в год:</strong> ${yearlyCost.toFixed(2)} руб.
-                </div>
-                <div class="result-item">
-                    <strong>Тариф:</strong> ${tariff} руб/кВт·ч
-                </div>
-            `;
-        }
-        
-        // ========== ИСТОРИЯ И СОХРАНЕНИЕ ==========
-        function saveSimpleCalculation(expression, result) {
-            const calculation = {
-                id: Date.now(),
-                type: 'simple',
-                expression: expression,
-                result: result,
-                date: new Date().toLocaleString()
-            };
-            
-            calculationsHistory.unshift(calculation);
-            if (calculationsHistory.length > 100) calculationsHistory.pop();
-            
-            localStorage.setItem('electricCalcHistory', JSON.stringify(calculationsHistory));
-            usageStats.totalCalculations++;
-            localStorage.setItem('calcStats', JSON.stringify(usageStats));
-            updateStats();
-        }
-        
-        function saveResult() {
-            const resultContent = document.getElementById('resultContent');
-            const calcType = document.getElementById('calcType');
-            const typeText = calcType.options[calcType.selectedIndex].text;
-            
-            if (!resultContent.innerHTML || resultContent.innerHTML.includes('Выберите')) {
-                showNotification('Сначала выполните расчет!', 'warning');
-                return;
-            }
-            
-            const calculation = {
-                id: Date.now(),
-                type: 'electric',
-                calcType: calcType.value,
-                calcTypeText: typeText,
-                result: resultContent.textContent,
-                date: new Date().toLocaleString()
-            };
-            
-            calculationsHistory.unshift(calculation);
-            if (calculationsHistory.length > 100) calculationsHistory.pop();
-            
-            localStorage.setItem('electricCalcHistory', JSON.stringify(calculationsHistory));
-            usageStats.totalCalculations++;
-            localStorage.setItem('calcStats', JSON.stringify(usageStats));
-            
-            showNotification('Результат сохранен!', 'success');
-            updateStats();
-        }
-        
-        function loadHistory() {
-            const historyList = document.getElementById('historyList');
-            if (!historyList) return;
-            
-            if (calculationsHistory.length === 0) {
-                historyList.innerHTML = `
-                    <div class="result-item" style="text-align: center;">
-                        <i class="fas fa-history"></i><br>
-                        История пуста
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            calculationsHistory.slice(0, 20).forEach(item => {
-                const icon = item.type === 'simple' ? 'fa-calculator' : 'fa-bolt';
-                const typeText = item.type === 'simple' ? 'Обычный расчет' : item.calcTypeText;
-                
-                html += `
-                    <div class="history-item" onclick="viewHistoryItem(${item.id})">
-                        <div class="date">
-                            <i class="far fa-calendar"></i> ${item.date}
-                        </div>
-                        <div class="type">
-                            <i class="fas ${icon}"></i> ${typeText}
-                        </div>
-                        <div class="result">
-                            ${item.type === 'simple' ? 
-                              `${item.expression} = ${item.result}` : 
-                              item.result.substring(0, 80) + '...'}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            historyList.innerHTML = html;
-        }
-        
-        function viewHistoryItem(id) {
-            const item = calculationsHistory.find(i => i.id === id);
-            if (!item) return;
-            
-            showNotification('Расчет загружен из истории', 'info');
-        }
-        
-        function clearAllHistory() {
-            if (confirm('Очистить всю историю?')) {
-                calculationsHistory = [];
-                localStorage.setItem('electricCalcHistory', JSON.stringify(calculationsHistory));
-                usageStats.totalCalculations = 0;
-                localStorage.setItem('calcStats', JSON.stringify(usageStats));
-                loadHistory();
-                updateStats();
-                showNotification('История очищена', 'success');
-            }
-        }
-        
-        function exportHistory() {
-            if (calculationsHistory.length === 0) {
-                showNotification('Нет данных для экспорта', 'warning');
-                return;
-            }
-            
-            const dataStr = JSON.stringify(calculationsHistory, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const link = document.createElement('a');
-            link.setAttribute('href', dataUri);
-            link.setAttribute('download', `electro-calc-history-${new Date().toISOString().slice(0,10)}.json`);
-            link.click();
-            
-            showNotification('История экспортирована', 'success');
-        }
-        
-        function copyResults() {
-            const resultText = document.getElementById('resultContent').textContent;
-            if (!resultText) {
-                showNotification('Нет результатов', 'warning');
-                return;
-            }
-            
-            navigator.clipboard.writeText(resultText)
-                .then(() => showNotification('Скопировано!', 'success'))
-                .catch(() => showNotification('Ошибка', 'warning'));
-        }
-        
-        function resetForm() {
-            const calcType = document.getElementById('calcType').value;
-            changeCalculator();
-            document.getElementById('results').classList.remove('show');
-            showNotification('Форма сброшена', 'info');
-        }
-        
-        // Добавляем поддержку клавиатуры
-        document.addEventListener('keydown', function(e) {
-            if (document.getElementById('basic').classList.contains('active')) {
-                e.preventDefault();
-                
-                if (e.key >= '0' && e.key <= '9') appendToCalc(e.key);
-                else if (e.key === '.') appendToCalc('.');
-                else if (e.key === '+') appendToCalc('+');
-                else if (e.key === '-') appendToCalc('-');
-                else if (e.key === '*') appendToCalc('*');
-                else if (e.key === '/') appendToCalc('/');
-                else if (e.key === 'Enter' || e.key === '=') calculateResult();
-                else if (e.key === 'Escape') clearCalc();
-                else if (e.key === 'Backspace') backspaceCalc();
-            }
-        });
-        
-        // Добавляем CSS для анимаций
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
-// ========== МОДАЛЬНОЕ ОКНО ПРЕДУПРЕЖДЕНИЯ ==========
-function showWarningModal() {
-    // Проверяем, показывалось ли уже предупреждение
-    const warningShown = localStorage.getItem('warningShown');
-    
-    // Если уже показывалось и пользователь принял - не показываем
-    if (warningShown === 'accepted') {
-        return;
-    }
-    
-    // Показываем модальное окно
-    const modal = document.getElementById('warningModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Блокируем скролл страницы
-    }
-}
-
-function hideWarningModal() {
-    const modal = document.getElementById('warningModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Возвращаем скролл
-        
-        // Показываем приветственное сообщение
-        setTimeout(() => {
-            showNotification('Электро-Калькулятор PRO готов к работе! ⚡', 'success');
-        }, 500);
-    }
-}
-
-// Инициализация модального окна при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    // Показываем предупреждение после небольшой задержки
-    setTimeout(showWarningModal, 800);
-    
-    // Обработчик чекбокса
-    const acceptCheckbox = document.getElementById('acceptWarning');
-    const acceptBtn = document.getElementById('acceptBtn');
-    
-    if (acceptCheckbox && acceptBtn) {
-        acceptCheckbox.addEventListener('change', function() {
-            acceptBtn.disabled = !this.checked;
-        });
-        
-        // Обработчик кнопки принятия
-        acceptBtn.addEventListener('click', function() {
-            if (!acceptCheckbox.checked) return;
-            
-            // Сохраняем в localStorage, что пользователь принял предупреждение
-            localStorage.setItem('warningShown', 'accepted');
-            
-            // Скрываем модальное окно
-            hideWarningModal();
-            
-            // Инициализируем остальное приложение
-            init();
-            updateStats();
-            loadHistory();
-            changeCalculator();
-        });
-    }
-});
-// ========== ПРОФЕССИОНАЛЬНЫЙ КАЛЬКУЛЯТОР СЕЧЕНИЯ КАБЕЛЯ ==========
-function calculateCablePro() {
-    return calculateCableProDetailed();
-}
-
-function calculateCableProDetailed() {
-    try {
-        // Получаем значения
-        const power = parseFloat(document.getElementById('cableProPower').value) || 0;
-        const currentInput = parseFloat(document.getElementById('cableProCurrent').value);
-        const voltage = parseInt(document.getElementById('cableProVoltage').value) || 220;
-        const phase = parseInt(document.getElementById('cableProPhase').value) || 1;
-        const length = parseFloat(document.getElementById('cableProLength').value) || 0;
-        const material = document.getElementById('cableProMaterial').value;
-        const method = document.getElementById('cableProMethod').value;
-        const maxLossPercent = parseFloat(document.getElementById('cableProLoss').value) || 5;
-        const cosPhi = parseFloat(document.getElementById('cableProCos').value) || 0.92;
-        const cableTemp = parseFloat(document.getElementById('cableProTemp').value) || 35;
-        const wiresCount = parseInt(document.getElementById('cableProWires').value) || 2;
-        const ambientTemp = parseFloat(document.getElementById('cableProAmbientTemp').value) || 25;
-        const powerMargin = parseFloat(document.getElementById('cableProMargin').value) || 15;
-        
-        // Проверка входных данных
-        if ((!power && !currentInput) || !length) {
-            throw new Error('Введите мощность или ток и длину линии');
-        }
-        
-        if (length <= 0) {
-            throw new Error('Длина линии должна быть больше 0');
-        }
-        
-        // Расчет тока с учетом фазности
-        let current;
-        if (currentInput) {
-            current = currentInput;
+        if (power < 1000) {
+            return 'B'; // Для освещения и слаботочных нагрузок
+        } else if (power >= 1000 && power < 5000) {
+            return 'C'; // Для смешанных нагрузок
         } else {
-            if (phase === 1) {
-                // Однофазная сеть
-                current = power / (voltage * cosPhi);
-            } else {
-                // Трехфазная сеть
-                current = power / (Math.sqrt(3) * voltage * cosPhi);
-            }
+            return 'D'; // Для мощных нагрузок с пусковыми токами
+        }
+    }
+    
+    // Рисование графика напряжения
+    function drawVoltageGraph(voltage, voltageDrop) {
+        const canvas = document.getElementById('voltageGraph');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('graphContainer');
+        
+        container.style.display = 'block';
+        
+        // Очистка canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const startX = 50;
+        const endX = 350;
+        const y = 50;
+        const remainingVoltage = voltage - voltageDrop;
+        const dropPointX = startX + (endX - startX) * (remainingVoltage / voltage);
+        
+        // Рисование фона
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Рисование шкалы
+        ctx.beginPath();
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(startX, 30);
+        ctx.lineTo(startX, 70);
+        ctx.moveTo(endX, 30);
+        ctx.lineTo(endX, 70);
+        ctx.stroke();
+        
+        // Рисование линии напряжения (зеленая - оставшееся напряжение)
+        ctx.beginPath();
+        ctx.strokeStyle = '#28a745';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([]);
+        ctx.moveTo(startX, y);
+        ctx.lineTo(dropPointX, y);
+        ctx.stroke();
+        
+        // Рисование линии падения (красная - потеря)
+        ctx.beginPath();
+        ctx.strokeStyle = '#dc3545';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([5, 3]);
+        ctx.moveTo(dropPointX, y);
+        ctx.lineTo(endX, y);
+        ctx.stroke();
+        
+        // Рисование маркеров
+        ctx.beginPath();
+        ctx.fillStyle = '#28a745';
+        ctx.arc(startX, y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.fillStyle = '#ffc107';
+        ctx.arc(dropPointX, y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.fillStyle = '#dc3545';
+        ctx.arc(endX, y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Подписи
+        ctx.fillStyle = '#333';
+        ctx.font = '12px Arial';
+        ctx.fillText(`${voltage}V`, startX - 30, y - 10);
+        ctx.fillText(`${remainingVoltage.toFixed(1)}V`, dropPointX - 30, y - 20);
+        ctx.fillText(`-${voltageDrop.toFixed(1)}V`, endX + 10, y - 10);
+    }
+    
+    // Основная функция расчета
+    function calculateDrop() {
+        // Получаем значения из формы
+        const voltage = parseFloat(document.getElementById('voltage').value);
+        const power = parseFloat(document.getElementById('power').value);
+        const length = parseFloat(document.getElementById('length').value);
+        const material = document.getElementById('material').value;
+        const cableSection = parseFloat(document.getElementById('cableSection').value);
+        
+        // Проверка на корректность ввода
+        if (!voltage || !power || !length || !cableSection) {
+            alert('Пожалуйста, заполните все поля корректными значениями');
+            return;
         }
         
-        // Добавляем запас по мощности
-        const currentWithMargin = current * (1 + powerMargin / 100);
+        // Расчет тока
+        const current = power / voltage;
         
-        // Удельное сопротивление материалов
-        const resistivityBase = material === 'copper' ? 0.0175 : 0.028;
+        // Расчет сопротивления кабеля (с учетом двух жил)
+        const resistance = (RESISTIVITY[material] * length * 2) / cableSection;
         
-        // Коррекция сопротивления на температуру
-        const tempCoefficient = material === 'copper' ? 0.00403 : 0.00403;
-        const resistivity = resistivityBase * (1 + tempCoefficient * (cableTemp - 20));
-        
-        // Получаем таблицы допустимых токов
-        const currentTables = getProCurrentTables(material, method, ambientTemp, wiresCount);
-        
-        // 1. Расчет сечения по допустимому току (с запасом)
-        let sectionByCurrent = 0;
-        let maxCurrentForSection = 0;
-        
-        const sections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
-        
-        for (const section of sections) {
-            const maxCurr = currentTables[section];
-            if (maxCurr && maxCurr >= currentWithMargin) {
-                sectionByCurrent = section;
-                maxCurrentForSection = maxCurr;
-                break;
-            }
-        }
-        
-        if (!sectionByCurrent) {
-            // Если не нашли подходящее сечение, берем максимальное
-            sectionByCurrent = 240;
-            maxCurrentForSection = currentTables[240] || 500;
-        }
-        
-        // 2. Расчет сечения по допустимому падению напряжения
-        const maxVoltageDrop = voltage * (maxLossPercent / 100);
-        let sectionByVoltage;
-        
-        if (phase === 1) {
-            // Однофазная: ΔU = 2 * I * L * ρ / S
-            sectionByVoltage = (2 * current * length * resistivity) / maxVoltageDrop;
-        } else {
-            // Трехфазная: ΔU = √3 * I * L * ρ / S
-            sectionByVoltage = (Math.sqrt(3) * current * length * resistivity) / maxVoltageDrop;
-        }
-        
-        // Округляем до ближайшего стандартного сечения
-        let sectionByVoltageStd = 0;
-        for (const section of sections) {
-            if (section >= sectionByVoltage) {
-                sectionByVoltageStd = section;
-                break;
-            }
-        }
-        
-        if (!sectionByVoltageStd) {
-            sectionByVoltageStd = 240;
-        }
-        
-        // Выбираем большее сечение из двух критериев
-        const recommendedSection = Math.max(sectionByCurrent, sectionByVoltageStd);
-        
-        // Расчет фактического падения напряжения для выбранного сечения
-        let voltageDrop;
-        if (phase === 1) {
-            voltageDrop = (2 * current * length * resistivity) / recommendedSection;
-        } else {
-            voltageDrop = (Math.sqrt(3) * current * length * resistivity) / recommendedSection;
-        }
-        
+        // Расчет падения напряжения
+        const voltageDrop = current * resistance;
         const voltageDropPercent = (voltageDrop / voltage) * 100;
-        const endVoltage = voltage - voltageDrop;
         
-        // Расчет сопротивления провода
-        let wireResistance;
-        if (phase === 1) {
-            wireResistance = (2 * resistivity * length) / recommendedSection;
-        } else {
-            wireResistance = resistivity * length / recommendedSection;
-        }
+        // Расчет потери мощности
+        const powerLoss = Math.pow(current, 2) * resistance;
         
-        // Расчет потерь мощности
-        const powerLoss = current * current * wireResistance;
-        const powerLossPercent = (powerLoss / power) * 100;
+        // Определение рекомендуемого сечения
+        const recommendedSection = getRecommendedSection(current, material);
         
-        // Расчет максимальной мощности для выбранного сечения
-        let maxPower;
-        if (phase === 1) {
-            maxPower = (maxCurrentForSection * voltage * cosPhi) / 1000;
-        } else {
-            maxPower = (maxCurrentForSection * voltage * Math.sqrt(3) * cosPhi) / 1000;
-        }
+        // Проверка по допустимому току
+        const maxCurrent = getMaxCurrent(cableSection, material);
+        const isCurrentOverload = current > maxCurrent;
         
-        // Формируем результат
-        let html = `
-            <div class="result-item success">
-                <strong><i class="fas fa-check-circle"></i> Рекомендуемое сечение:</strong> ${recommendedSection} мм²
-            </div>
-            
-            <div class="grid-x grid-margin-x" style="margin-top: 15px;">
-                <div class="cell medium-6">
-                    <div class="result-item">
-                        <strong>Расчетный ток:</strong> ${current.toFixed(2)} А
-                        <br><small>С запасом ${powerMargin}%: ${currentWithMargin.toFixed(2)} А</small>
+        // Получение максимального тока для рекомендуемого сечения
+        const recommendedMaxCurrent = getMaxCurrent(recommendedSection, material);
+        
+        // Подбор автомата для текущего сечения
+        const breakerCurrent = selectBreaker(current, maxCurrent, cableSection);
+        const breakerCharacteristic = getRecommendedCharacteristic(power, voltage);
+        
+        // Подбор автомата для рекомендуемого сечения
+        const recommendedBreakerCurrent = selectBreaker(current, recommendedMaxCurrent, recommendedSection);
+        const recommendedBreakerCharacteristic = getRecommendedCharacteristic(power, voltage);
+        
+        // Формирование результата
+        let resultHTML = `
+            <div class="result-alert alert-info">
+                <h4>Результаты расчета:</h4>
+                
+                <div class="result-item">
+                    <span class="result-label">Ток нагрузки:</span>
+                    <span class="result-value">${current.toFixed(2)} А</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Выбранное сечение:</span>
+                    <span class="result-value">${cableSection} мм²</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Сопротивление линии:</span>
+                    <span class="result-value">${resistance.toFixed(4)} Ом</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Падение напряжения:</span>
+                    <span class="result-value">${voltageDrop.toFixed(2)} В (${voltageDropPercent.toFixed(2)}%)</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Потери мощности:</span>
+                    <span class="result-value">${powerLoss.toFixed(2)} Вт</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Напряжение в конце линии:</span>
+                    <span class="result-value">${(voltage - voltageDrop).toFixed(2)} В</span>
+                </div>
+                
+                <hr>
+                
+                <div class="result-item">
+                    <span class="result-label">Рекомендуемое сечение по току:</span>
+                    <span class="result-value">${recommendedSection} мм²</span>
+                </div>
+        `;
+        
+        // Блок с автоматическими выключателями
+        resultHTML += `
+            <div class="breaker-section">
+                <div class="breaker-title">🔌 Выбор автоматического выключателя</div>
+                
+                <div class="breaker-box current">
+                    <div>
+                        <strong>Для текущего сечения (${cableSection} мм²)</strong>
+                        <div><small>Допустимый ток кабеля: ${maxCurrent} А</small></div>
                     </div>
-                    
-                    <div class="result-item">
-                        <strong>Напряжение сети:</strong> ${voltage}В (${phase === 1 ? '1 фаза' : '3 фазы'})
-                    </div>
-                    
-                    <div class="result-item">
-                        <strong>Материал кабеля:</strong> ${material === 'copper' ? 'Медь' : 'Алюминий'}
-                    </div>
-                    
-                    <div class="result-item">
-                        <strong>Длина линии:</strong> ${length} м
+                    <div>
+                        <span class="breaker-value">${breakerCurrent} А</span>
+                        <span class="breaker-characteristic">${breakerCharacteristic}</span>
                     </div>
                 </div>
                 
-                <div class="cell medium-6">
-                    <div class="result-item">
-                        <strong>Макс. ток для кабеля:</strong> ${maxCurrentForSection} А
+                <div class="breaker-box recommended">
+                    <div>
+                        <strong>Для рекомендуемого сечения (${recommendedSection} мм²)</strong>
+                        <div><small>Допустимый ток кабеля: ${recommendedMaxCurrent} А</small></div>
                     </div>
-                    
-                    <div class="result-item">
-                        <strong>Макс. мощность:</strong> ${maxPower.toFixed(1)} кВт
-                    </div>
-                    
-                    <div class="result-item">
-                        <strong>Сопротивление:</strong> ${wireResistance.toFixed(4)} Ом
-                    </div>
-                    
-                    <div class="result-item">
-                        <strong>Потери мощности:</strong> ${powerLoss.toFixed(1)} Вт (${powerLossPercent.toFixed(2)}%)
+                    <div>
+                        <span class="breaker-value">${recommendedBreakerCurrent} А</span>
+                        <span class="breaker-characteristic">${recommendedBreakerCharacteristic}</span>
                     </div>
                 </div>
-            </div>
-            
-            <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}" style="margin-top: 15px;">
-                <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(2)} В (${voltageDropPercent.toFixed(2)}%)
-                <br>
-                <small>
-                    ${voltageDropPercent > 5 ? '⚠️ Превышение нормы ПУЭ (5%)!' : 
-                      voltageDropPercent > 3 ? '⚠️ Близко к пределу (рекомендуется <3%)' : 
-                      '✅ В пределах нормы (<3%)'}
-                </small>
-            </div>
-            
-            <div class="result-item">
-                <strong>Итоговое напряжение на нагрузке:</strong> ${endVoltage.toFixed(1)} В
-                <br>
-                <small>${endVoltage < voltage * 0.95 ? '⚠️ Напряжение ниже 95% от номинала' : '✅ Напряжение в норме'}</small>
-            </div>
-            
-            <div class="result-item info" style="margin-top: 15px;">
-                <strong><i class="fas fa-info-circle"></i> Рекомендации:</strong>
-                <ul style="margin-left: 20px; margin-top: 5px;">
-                    <li>Используйте кабель марки ${material === 'copper' ? 'ВВГ-нг(А)' : 'АВВГ'} сечением ${recommendedSection} мм²</li>
-                    <li>Способ прокладки: ${getProMethodName(method)}</li>
-                    ${voltageDropPercent > 3 ? `<li>Рекомендуется увеличить сечение до ${Math.ceil(recommendedSection * 1.5)} мм² для снижения потерь</li>` : ''}
-                    ${current > maxCurrentForSection * 0.9 ? `<li>⚠️ Ток близок к пределу! Рассмотрите сечение ${Math.ceil(recommendedSection * 1.5)} мм²</li>` : ''}
-                    ${length > 50 ? `<li>Для длины ${length}м рекомендуется проверять падение напряжения при подключении новой нагрузки</li>` : ''}
-                </ul>
-            </div>
-            
-            <div class="result-item warning" style="margin-top: 15px;">
-                <strong><i class="fas fa-exclamation-triangle"></i> Примечание:</strong>
-                <p style="font-size: 0.8rem; margin-top: 5px;">
-                    Расчет выполнен по методике ПУЭ 7 с учетом всех параметров. 
-                    Для ответственных объектов рекомендуется дополнительная проверка расчетов.
-                    При температуре окружающей среды выше ${ambientTemp}°C допустимый ток снижается.
-                </p>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm table-breaker">
+                        <thead>
+                            <tr>
+                                <th>Характеристика</th>
+                                <th>Применение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>B</td>
+                                <td>Освещение, слаботочные нагрузки</td>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>Смешанные нагрузки, розетки, бытовая техника</td>
+                            </tr>
+                            <tr>
+                                <td>D</td>
+                                <td>Мощные моторы, трансформаторы, насосы</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
         
-        return html;
-        
-    } catch (error) {
-        return `<div class="result-item danger">Ошибка: ${error.message}</div>`;
-    }
-}
-
-// Вспомогательные функции для PRO калькулятора
-function getProCurrentTables(material, method, ambientTemp, wiresCount) {
-    // Базовые значения по ПУЭ для меди при 30°C (открытая прокладка)
-    let baseTable = {
-        copper: {
-            1.5: 19, 2.5: 27, 4: 38, 6: 46, 10: 70,
-            16: 85, 25: 115, 35: 135, 50: 175, 70: 215,
-            95: 260, 120: 300, 150: 340, 185: 385, 240: 445
-        },
-        aluminum: {
-            2.5: 20, 4: 28, 6: 36, 10: 50,
-            16: 60, 25: 85, 35: 100, 50: 135, 70: 165,
-            95: 200, 120: 230, 150: 270, 185: 310, 240: 370
-        }
-    };
-    
-    // Коррекция на температуру окружающей среды (ПУЭ 1.3.10-1.3.12)
-    let tempCorrection = 1.0;
-    if (ambientTemp > 25) {
-        // Снижение на 1% на каждый градус выше 25°C
-        tempCorrection = 1 - (ambientTemp - 25) * 0.01;
-        tempCorrection = Math.max(tempCorrection, 0.7); // Не ниже 70%
-    } else if (ambientTemp < 25) {
-        // Увеличение на 0.5% на каждый градус ниже 25°C
-        tempCorrection = 1 + (25 - ambientTemp) * 0.005;
-        tempCorrection = Math.min(tempCorrection, 1.15); // Не выше 115%
-    }
-    
-    // Коэффициенты для способов прокладки (ПУЕ 1.3.10)
-    const methodCoefficients = {
-        open: 1.0,
-        closed: 0.9,
-        pipe2: 0.8,
-        pipe3: 0.7,
-        pipe4: 0.65,
-        pipe2c: 0.75,
-        pipe3c: 0.7,
-        tray1: 0.9,
-        tray2: 0.8,
-        tray3: 0.75,
-        tray4: 0.7,
-        tray5: 0.65,
-        tray6: 0.6,
-        tray_many: 0.55
-    };
-    
-    // Коррекция на количество жил
-    let wiresCorrection = 1.0;
-    if (wiresCount >= 3) {
-        wiresCorrection = 0.9; // Для 3 и более жил
-    }
-    
-    const table = baseTable[material];
-    const methodCoeff = methodCoefficients[method] || 1.0;
-    
-    // Применяем все коэффициенты
-    const result = {};
-    for (const [section, current] of Object.entries(table)) {
-        result[section] = Math.round(current * methodCoeff * tempCorrection * wiresCorrection);
-    }
-    
-    return result;
-}
-
-function getProMethodName(method) {
-    const names = {
-        open: 'Открытая проводка',
-        closed: 'Скрытая проводка',
-        pipe2: 'Два одножильных в трубе',
-        pipe3: 'Три одножильных в трубе',
-        pipe4: 'Четыре одножильных в трубе',
-        pipe2c: 'Один двухжильный в трубе',
-        pipe3c: 'Один трёхжильный в трубе',
-        tray1: 'Короб, 1-4 кабеля',
-        tray2: 'Короб, 5-6 кабелей',
-        tray3: 'Короб, 7-9 кабелей',
-        tray4: 'Короб, 10-11 кабелей',
-        tray5: 'Короб, 12-14 кабелей',
-        tray6: 'Короб, 15-18 кабелей',
-        tray_many: 'Короб, более 18 кабелей'
-    };
-    return names[method] || method;
-}
-
-// Функция для автоматического расчета тока
-function calculateProCurrent() {
-    const power = parseFloat(document.getElementById('cableProPower').value);
-    const voltage = parseInt(document.getElementById('cableProVoltage').value);
-    const cosPhi = parseFloat(document.getElementById('cableProCos').value);
-    const phase = parseInt(document.getElementById('cableProPhase').value);
-    
-    if (power && voltage && cosPhi) {
-        let current;
-        if (phase === 1) {
-            current = power / (voltage * cosPhi);
+        // Добавление предупреждений
+        if (isCurrentOverload) {
+            resultHTML += `
+                <div class="danger-message">
+                    ⚠️ ПРЕВЫШЕНИЕ ДОПУСТИМОГО ТОКА!<br>
+                    Ток ${current.toFixed(2)} А превышает максимально допустимый ${maxCurrent} А для сечения ${cableSection} мм².<br>
+                    <strong>Рекомендуется увеличить сечение до ${recommendedSection} мм² и установить автомат ${recommendedBreakerCurrent} А</strong>
+                </div>
+            `;
         } else {
-            current = power / (Math.sqrt(3) * voltage * cosPhi);
-        }
-        
-        if (!isNaN(current) && isFinite(current)) {
-            document.getElementById('cableProCurrent').value = current.toFixed(2);
-        }
-    }
-}
-
-
-// ========== PWA УСТАНОВКА ==========
-let deferredPrompt;
-const installButton = document.getElementById('installButton');
-
-// Показываем кнопку установки при необходимости
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Предотвращаем автоматическое отображение подсказки
-    e.preventDefault();
-    // Сохраняем событие для использования позже
-    deferredPrompt = e;
-    // Показываем кнопку установки
-    installButton.style.display = 'flex';
-    
-    // Показываем уведомление
-    showNotification('Установите приложение для работы оффлайн!', 'info');
-});
-
-// Обработчик установки
-function installPWA() {
-    if (!deferredPrompt) return;
-    
-    // Показываем запрос на установку
-    deferredPrompt.prompt();
-    
-    // Ждем ответа пользователя
-    deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-            console.log('Пользователь принял установку');
-            showNotification('Приложение успешно установлено!', 'success');
-        } else {
-            console.log('Пользователь отклонил установку');
-        }
-        
-        // Сбрасываем переменную
-        deferredPrompt = null;
-        
-        // Скрываем кнопку
-        installButton.style.display = 'none';
-    });
-}
-
-// Скрываем кнопку после установки
-window.addEventListener('appinstalled', (evt) => {
-    console.log('Приложение установлено');
-    installButton.style.display = 'none';
-    deferredPrompt = null;
-    
-    // Показываем сообщение об успешной установке
-    setTimeout(() => {
-        showNotification('Приложение установлено! Теперь работает оффлайн.', 'success');
-    }, 1000);
-});
-
-// Проверяем статус установки
-function checkInstallStatus() {
-    // Проверяем, запущено ли приложение в режиме standalone
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('Запущено как PWA');
-        document.body.classList.add('pwa-mode');
-        installButton.style.display = 'none';
-    }
-    
-    // Проверяем iOS standalone
-    if (window.navigator.standalone === true) {
-        console.log('Запущено как PWA на iOS');
-        document.body.classList.add('pwa-mode');
-        installButton.style.display = 'none';
-    }
-}
-
-// Проверяем при загрузке
-document.addEventListener('DOMContentLoaded', checkInstallStatus);
-        // ========== ОФФЛАЙН ДЕТЕКТОР ==========
-// Проверяем онлайн статус
-function updateOnlineStatus() {
-    if (navigator.onLine) {
-        document.body.classList.remove('offline');
-        // Показываем уведомление при восстановлении связи
-        setTimeout(() => {
-            showNotification('Соединение восстановлено', 'success');
-        }, 500);
-    } else {
-        document.body.classList.add('offline');
-        showNotification('Работаем в оффлайн режиме ⚡', 'warning');
-    }
-}
-
-// Слушаем события онлайн/оффлайн
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-// Проверяем при загрузке
-updateOnlineStatus();
-
-        // ========== PWA ЗАГОЛОВОК (Решение 5) ==========
-function updateTitleForPWA() {
-    // Проверяем все возможные признаки PWA режима
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const isiOSPWA = window.navigator.standalone === true;
-    const isAndroidPWA = window.matchMedia('(display-mode: fullscreen)').matches;
-    
-    // Проверяем, запущено ли как приложение
-    const isPWA = isStandalone || isiOSPWA || isAndroidPWA;
-    
-    if (isPWA) {
-        console.log('📱 Режим PWA активирован');
-        
-        // 1. Обновляем заголовок окна (title)
-        document.title = 'ЭлектроКальк PRO';
-        
-        // 2. Обновляем видимый заголовок на странице
-        const titleElement = document.querySelector('.logo-text h1');
-        if (titleElement) {
-            titleElement.innerHTML = '<i class="fas fa-bolt"></i> ЭлектроКальк PRO';
-            titleElement.style.fontSize = '1.2rem';
-            titleElement.style.marginBottom = '3px';
-        }
-        
-        // 3. Обновляем подзаголовок
-        const subtitleElement = document.querySelector('.logo-text p');
-        if (subtitleElement) {
-            subtitleElement.innerHTML = 'Electric_Group | +7 (963) 598-48-46';
-            subtitleElement.style.fontSize = '0.75rem';
-            subtitleElement.style.opacity = '0.9';
-        }
-        
-        // 4. Уменьшаем шапку для компактности
-        const header = document.querySelector('.header');
-        if (header) {
-            header.style.padding = '12px 20px';
-        }
-        
-        // 5. Добавляем класс для CSS стилизации
-        document.body.classList.add('pwa-title-mode');
-        
-        // 6. Показываем уведомление (только при первом запуске)
-        if (!localStorage.getItem('pwaTitleAdjusted')) {
-            setTimeout(() => {
-                showNotification('📱 Режим приложения активирован', 'info');
-                localStorage.setItem('pwaTitleAdjusted', 'true');
-            }, 1000);
-        }
-        
-    } else {
-        // Браузерный режим - восстанавливаем оригинальный заголовок
-        document.title = '⚡ Электро-Калькулятор PRO | Electric_Group';
-        
-        // Восстанавливаем оригинальный заголовок на странице
-        const titleElement = document.querySelector('.logo-text h1');
-        if (titleElement) {
-            titleElement.innerHTML = '<i class="fas fa-bolt"></i> Электро-Калькулятор PRO';
-            titleElement.style.fontSize = '';
-            titleElement.style.marginBottom = '';
-        }
-        
-        const subtitleElement = document.querySelector('.logo-text p');
-        if (subtitleElement) {
-            subtitleElement.innerHTML = 'Electric_Group | +7 (963) 598-48-46';
-            subtitleElement.style.fontSize = '';
-            subtitleElement.style.opacity = '';
-        }
-        
-        // Убираем компактный режим
-        document.body.classList.remove('pwa-title-mode');
-    }
-}
-
-// Слушаем изменение режима отображения (на случай, если пользователь переключает режим)
-window.matchMedia('(display-mode: standalone)').addListener(updateTitleForPWA);
-window.matchMedia('(display-mode: fullscreen)').addListener(updateTitleForPWA);
-
-// Вызываем при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    // Небольшая задержка для гарантии, что DOM полностью загружен
-    setTimeout(updateTitleForPWA, 100);
-});
-
-// Также проверяем при изменении видимости страницы
-document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-        setTimeout(updateTitleForPWA, 300);
-    }
-});
-
-// Проверяем при возврате на страницу (для iOS)
-window.addEventListener('pageshow', updateTitleForPWA);
-
-// ========== ДОПОЛНИТЕЛЬНО: Кнопка переключения заголовка для теста ==========
-function addPwaTestButton() {
-    // Создаем кнопку для тестирования PWA режима (только в разработке)
-    if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
-        const testBtn = document.createElement('button');
-        testBtn.innerHTML = '🔧 Тест PWA заголовка';
-        testBtn.style.cssText = `
-            position: fixed;
-            bottom: 70px;
-            right: 15px;
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        `;
-        testBtn.onclick = function() {
-            // Переключаем режим PWA для тестирования
-            if (document.body.classList.contains('pwa-title-mode')) {
-                document.body.classList.remove('pwa-title-mode');
-                document.title = '⚡ Электро-Калькулятор PRO | Electric_Group';
-                showNotification('Режим браузера', 'info');
+            // Проверка соответствия автомата и кабеля
+            if (breakerCurrent > maxCurrent) {
+                resultHTML += `
+                    <div class="warning-message">
+                        ⚠️ Выбранный автомат ${breakerCurrent} А превышает допустимый ток кабеля ${maxCurrent} А!<br>
+                        Это может привести к перегреву кабеля. Рекомендуется уменьшить номинал автомата.
+                    </div>
+                `;
+            } else if (breakerCurrent < current * 0.9) {
+                resultHTML += `
+                    <div class="warning-message">
+                        ⚠️ Автомат ${breakerCurrent} А может срабатывать при пиковых нагрузках.<br>
+                        Рекомендуется установить автомат номиналом ${recommendedBreakerCurrent} А.
+                    </div>
+                `;
             } else {
-                document.body.classList.add('pwa-title-mode');
-                document.title = 'ЭлектроКальк PRO';
-                showNotification('Режим PWA', 'success');
+                resultHTML += `
+                    <div class="success-box">
+                        ✅ Автомат ${breakerCurrent} А (${breakerCharacteristic}) правильно подобран для данного сечения и нагрузки.
+                    </div>
+                `;
             }
-        };
-        document.body.appendChild(testBtn);
+        }
+        
+        if (voltageDropPercent > 5) {
+            resultHTML += `
+                <div class="warning-message">
+                    ⚠️ Падение напряжения (${voltageDropPercent.toFixed(2)}%) превышает рекомендуемые 5%!<br>
+                    Рекомендуется увеличить сечение кабеля до ${recommendedSection} мм² или уменьшить длину линии.
+                </div>
+            `;
+        } else if (voltageDropPercent > 3) {
+            resultHTML += `
+                <div class="info-box">
+                    ℹ️ Падение напряжения в пределах нормы (до 5%), но для ответственных потребителей рекомендуется не более 3%.
+                </div>
+            `;
+        } else {
+            resultHTML += `
+                <div class="info-box">
+                    ✅ Падение напряжения в пределах оптимальных значений (менее 3%).
+                </div>
+            `;
+        }
+        
+        resultHTML += `</div>`;
+        
+        // Отображение результата
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = resultHTML;
+        resultDiv.style.display = 'block';
+        
+        // Рисование графика
+        drawVoltageGraph(voltage, voltageDrop);
+        
+        // Сохранение в историю
+        saveToHistory({
+            voltage: voltage,
+            power: power,
+            length: length,
+            material: material,
+            cableSection: cableSection
+        }, {
+            voltageDrop: voltageDrop.toFixed(2),
+            voltageDropPercent: voltageDropPercent.toFixed(2),
+            current: current.toFixed(2),
+            breakerCurrent: breakerCurrent,
+            breakerCharacteristic: breakerCharacteristic,
+            recommendedBreakerCurrent: recommendedBreakerCurrent
+        });
+        
+        // Плавная прокрутка к результату
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-}
-
-// Добавляем тестовую кнопку в режиме разработки
-document.addEventListener('DOMContentLoaded', addPwaTestButton);
-    </script>
-// Регистрируем Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js')
-            .then(function(registration) {
-                console.log('ServiceWorker зарегистрирован: ', registration.scope);
-                
-                // Показываем уведомление об установке
-                if (!localStorage.getItem('pwaInstalled')) {
-                    setTimeout(() => {
-                        showNotification('Приложение готово к работе оффлайн!', 'success');
-                        localStorage.setItem('pwaInstalled', 'true');
-                    }, 3000);
-                }
-            })
-            .catch(function(err) {
-                console.log('Ошибка регистрации ServiceWorker: ', err);
-            });
-    });
-}
-
-// Проверяем, установлено ли приложение
-function checkPWAInstall() {
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        window.navigator.standalone === true) {
-        document.body.classList.add('pwa-installed');
-    }
-}
-
-// Вызываем проверку при загрузке
-document.addEventListener('DOMContentLoaded', checkPWAInstall);
     
+    // Загрузка истории при старте
+    window.onload = function() {
+        loadHistory();
+        
+        // Добавление обработчика для клавиши Enter
+        document.getElementById('calculatorForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculateDrop();
+            }
+        });
+    };
+</script>
+
+<!-- Подключение Bootstrap JS (для работы некоторых компонентов) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
