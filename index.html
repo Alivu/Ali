@@ -2442,11 +2442,16 @@ case 'cable_pro':
         </div>
     `;
     
-    // Инициализация зависимых полей
+    // Инициализация зависимых полей и синхронизации
     setTimeout(() => {
         const voltageSelect = document.getElementById('cableProVoltage');
         const phaseSelect = document.getElementById('cableProPhase');
+        const powerInput = document.getElementById('cableProPower');
+        const currentInput = document.getElementById('cableProCurrent');
         
+        if (!voltageSelect || !phaseSelect || !powerInput || !currentInput) return;
+        
+        // Логика для фазности
         voltageSelect.addEventListener('change', function() {
             const voltage = parseInt(this.value);
             if (voltage === 380 || voltage === 400) {
@@ -2454,34 +2459,36 @@ case 'cable_pro':
             } else {
                 phaseSelect.value = '1';
             }
-        });
-        
-        // Авторасчет тока при вводе мощности
-        document.getElementById('cableProPower').addEventListener('input', function() {
-            calculateProCurrent();
-        });
-    }, 100);
-    break;
-    
-    // Инициализация зависимых полей
-    setTimeout(() => {
-        const voltageSelect = document.getElementById('cableProVoltage');
-        const phaseSelect = document.getElementById('cableProPhase');
-        
-        voltageSelect.addEventListener('change', function() {
-            const voltage = parseInt(this.value);
-            if (voltage === 380 || voltage === 400) {
-                phaseSelect.value = '3';
-            } else {
-                phaseSelect.value = '1';
+            // При изменении напряжения пересчитываем ток
+            if (powerInput.value) {
+                const power = parseFloat(powerInput.value);
+                if (power) {
+                    currentInput.value = (power / parseInt(this.value)).toFixed(2);
+                }
             }
         });
         
-        // Авторасчет тока при вводе мощности
-        document.getElementById('cableProPower').addEventListener('input', function() {
-            calculateProCurrent();
+        // Синхронизация: Вт → А
+        powerInput.addEventListener('input', function() {
+            const power = parseFloat(this.value);
+            const voltage = parseInt(voltageSelect.value) || 220;
+            if (power && !isNaN(power) && power > 0) {
+                const calculatedCurrent = power / voltage;
+                currentInput.value = calculatedCurrent.toFixed(2);
+            }
         });
-    }, 100);
+        
+        // Синхронизация: А → Вт
+        currentInput.addEventListener('input', function() {
+            const current = parseFloat(this.value);
+            const voltage = parseInt(voltageSelect.value) || 220;
+            if (current && !isNaN(current) && current > 0) {
+                const calculatedPower = current * voltage;
+                powerInput.value = Math.round(calculatedPower);
+            }
+        });
+        
+    }, 200);
     break;
                     
                 case 'led':
@@ -3542,17 +3549,21 @@ function calculateCableProDetailed() {
             throw new Error('Длина линии должна быть больше 0');
         }
         
-        // Расчет тока с учетом фазности
-        let current;
-        if (currentInput) {
-            current = currentInput;
-        } else {
-            if (phase === 1) {
-                current = power / (voltage * cosPhi);
-            } else {
-                current = power / (Math.sqrt(3) * voltage * cosPhi);
-            }
-        }
+// Расчет тока для выбора сечения
+let current;
+if (currentInput) {
+    // Если ввели ток - используем как есть (он уже правильный)
+    current = currentInput;
+} else if (power) {
+    // Если ввели мощность - рассчитываем ток с cos φ
+    if (phase === 1) {
+        current = power / (voltage * cosPhi);
+    } else {
+        current = power / (Math.sqrt(3) * voltage * cosPhi);
+    }
+} else {
+    throw new Error('Введите мощность или ток');
+}
         
         // Добавляем запас по мощности
         const currentWithMargin = current * (1 + powerMargin / 100);
