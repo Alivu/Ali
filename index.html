@@ -3832,70 +3832,119 @@ function calculateCableProDetailed() {
         return `<div class="result-item danger">Ошибка: ${error.message}</div>`;
     }
 }
-        // Вспомогательные функции для PRO калькулятора
-        function getProCurrentTables(material, method, ambientTemp, wiresCount) {
-            // Базовые значения по ПУЭ для меди при 30°C (открытая прокладка)
-            let baseTable = {
-                copper: {
-                    1.5: 19, 2.5: 27, 4: 38, 6: 46, 10: 70,
-                    16: 85, 25: 115, 35: 135, 50: 175, 70: 215,
-                    95: 260, 120: 300, 150: 340, 185: 385, 240: 445
-                },
-                aluminum: {
-                    2.5: 20, 4: 28, 6: 36, 10: 50,
-                    16: 60, 25: 85, 35: 100, 50: 135, 70: 165,
-                    95: 200, 120: 230, 150: 270, 185: 310, 240: 370
-                }
-            };
-            
-            // Коррекция на температуру окружающей среды (ПУЭ 1.3.10-1.3.12)
-            let tempCorrection = 1.0;
-            if (ambientTemp > 25) {
-                // Снижение на 1% на каждый градус выше 25°C
-                tempCorrection = 1 - (ambientTemp - 25) * 0.01;
-                tempCorrection = Math.max(tempCorrection, 0.7); // Не ниже 70%
-            } else if (ambientTemp < 25) {
-                // Увеличение на 0.5% на каждый градус ниже 25°C
-                tempCorrection = 1 + (25 - ambientTemp) * 0.005;
-                tempCorrection = Math.min(tempCorrection, 1.15); // Не выше 115%
-            }
-            
-            // Коэффициенты для способов прокладки (ПУЕ 1.3.10)
-            const methodCoefficients = {
-                open: 1.0,
-                closed: 0.9,
-                pipe2: 0.8,
-                pipe3: 0.7,
-                pipe4: 0.65,
-                pipe2c: 0.75,
-                pipe3c: 0.7,
-                tray1: 0.9,
-                tray2: 0.8,
-                tray3: 0.75,
-                tray4: 0.7,
-                tray5: 0.65,
-                tray6: 0.6,
-                tray_many: 0.55
-            };
-            
-            // Коррекция на количество жил
-            let wiresCorrection = 1.0;
-            if (wiresCount >= 3) {
-                wiresCorrection = 0.9; // Для 3 и более жил
-            }
-            
-            const table = baseTable[material];
-            const methodCoeff = methodCoefficients[method] || 1.0;
-            
-            // Применяем все коэффициенты
-            const result = {};
-            for (const [section, current] of Object.entries(table)) {
-                result[section] = Math.round(current * methodCoeff * tempCorrection * wiresCorrection);
-            }
-            
-            return result;
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ С ПРАВИЛЬНЫМИ ЗНАЧЕНИЯМИ ПО ПУЭ 7
+function getProCurrentTables(material, method, ambientTemp, wiresCount) {
+    // Базовые значения по ПУЭ 7 (Таблица 1.3.4 и 1.3.5)
+    // для проводов и кабелей с медными жилами
+    const baseTables = {
+        copper: {
+            // Открытая прокладка (одножильные)
+            1.5: 19, 2.5: 27, 4: 36, 6: 46, 10: 63,
+            16: 85, 25: 115, 35: 140, 50: 175, 70: 215,
+            95: 260, 120: 300, 150: 340, 185: 385, 240: 445
+        },
+        aluminum: {
+            // Для алюминия (пониженные значения)
+            2.5: 20, 4: 28, 6: 36, 10: 50,
+            16: 67, 25: 90, 35: 110, 50: 140, 70: 175,
+            95: 215, 120: 250, 150: 290, 185: 330, 240: 390
         }
+    };
+    
+    // Коэффициенты для способов прокладки (ПУЭ 1.3.10)
+    const methodCoefficients = {
+        open: 1.0,        // Открытая проводка (один кабель)
+        closed: 0.9,       // Скрытая проводка (в стене)
+        pipe2: 0.8,        // Два одножильных в трубе
+        pipe3: 0.7,        // Три одножильных в трубе
+        pipe4: 0.65,       // Четыре одножильных в трубе
+        pipe2c: 0.75,      // Один двухжильный в трубе (ВАШ СЛУЧАЙ)
+        pipe3c: 0.7,       // Один трёхжильный в трубе
+        pipe4c: 0.65,      // Один четырёхжильный в трубе
+        tray1: 0.95,       // Лоток, 1 кабель
+        tray2: 0.9,        // Лоток, 2 кабеля
+        tray3: 0.85,       // Лоток, 3 кабеля
+        tray4: 0.8,        // Лоток, 4 кабеля
+        tray5: 0.75,       // Лоток, 5-6 кабелей
+        tray6: 0.7,        // Лоток, 7-9 кабелей
+        tray_many: 0.65    // Лоток, 10+ кабелей
+    };
+    
+    // Температурные коэффициенты (ПУЭ 1.3.12)
+    let tempCorrection = 1.0;
+    if (ambientTemp !== 25) {
+        if (ambientTemp > 25) {
+            // Для каждого градуса выше 25°C снижаем на 1%
+            tempCorrection = 1 - (ambientTemp - 25) * 0.01;
+            tempCorrection = Math.max(tempCorrection, 0.7); // Не ниже 70%
+        } else {
+            // Для каждого градуса ниже 25°C увеличиваем на 0.5%
+            tempCorrection = 1 + (25 - ambientTemp) * 0.005;
+            tempCorrection = Math.min(tempCorrection, 1.15); // Не выше 115%
+        }
+    }
+    
+    // Коэффициент на количество одновременно работающих жил
+    // Для 3-х и более жил снижаем на 10%
+    const wiresCorrection = wiresCount >= 3 ? 0.9 : 1.0;
+    
+    const baseTable = baseTables[material];
+    const methodCoeff = methodCoefficients[method] || 0.7; // По умолчанию 0.7 для безопасности
+    
+    // Применяем все коэффициенты
+    const result = {};
+    for (const [section, current] of Object.entries(baseTable)) {
+        // Сначала применяем коэффициент прокладки, затем температуру, затем количество жил
+        let correctedCurrent = current * methodCoeff * tempCorrection * wiresCorrection;
+        
+        // Округляем до целого числа
+        result[section] = Math.round(correctedCurrent);
+    }
+    
+    return result;
+}
 
+// Функция для отладки - показывает все коэффициенты
+function showCalculationDetails() {
+    const method = document.getElementById('cableProMethod').value;
+    const ambientTemp = parseFloat(document.getElementById('cableProAmbientTemp').value) || 25;
+    const wiresCount = parseInt(document.getElementById('cableProWires').value) || 2;
+    const material = document.getElementById('cableProMaterial').value;
+    const selectedSection = parseFloat(document.getElementById('cableProSection').value) || 16;
+    
+    const baseCurrents = {
+        copper: {16: 85, 25: 115, 35: 140},
+        aluminum: {16: 67, 25: 90, 35: 110}
+    };
+    
+    const methodCoeffs = {
+        open: 1.0, closed: 0.9, pipe2: 0.8, pipe3: 0.7, pipe4: 0.65,
+        pipe2c: 0.75, pipe3c: 0.7, pipe4c: 0.65
+    };
+    
+    const baseCurrent = baseCurrents[material][selectedSection];
+    const methodCoeff = methodCoeffs[method] || 0.75;
+    
+    let tempCorrection = 1.0;
+    if (ambientTemp > 25) {
+        tempCorrection = 1 - (ambientTemp - 25) * 0.01;
+    } else if (ambientTemp < 25) {
+        tempCorrection = 1 + (25 - ambientTemp) * 0.005;
+    }
+    
+    const wiresCorrection = wiresCount >= 3 ? 0.9 : 1.0;
+    const finalCurrent = Math.round(baseCurrent * methodCoeff * tempCorrection * wiresCorrection);
+    
+    console.log('=== ДЕТАЛИ РАСЧЕТА ===');
+    console.log(`Сечение: ${selectedSection} мм²`);
+    console.log(`Базовый ток: ${baseCurrent} А`);
+    console.log(`Коэф. прокладки (${method}): ${methodCoeff}`);
+    console.log(`Температурный коэф. (${ambientTemp}°C): ${tempCorrection.toFixed(2)}`);
+    console.log(`Коэф. жил (${wiresCount}): ${wiresCorrection}`);
+    console.log(`ИТОГОВЫЙ ток: ${baseCurrent} × ${methodCoeff} × ${tempCorrection.toFixed(2)} × ${wiresCorrection} = ${finalCurrent} А`);
+    
+    return finalCurrent;
+}
         function getProMethodName(method) {
             const names = {
                 open: 'Открытая проводка',
