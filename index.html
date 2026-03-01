@@ -2264,7 +2264,7 @@ case 'breaker':
                     `;
                     break;
 
-// ========== ОБНОВЛЕННЫЙ КОД ДЛЯ cable_pro С КНОПКОЙ ТАБЛИЦЫ ==========
+// ========== ОБНОВЛЕННЫЙ КОД ДЛЯ cable_pro С ВЫБОРОМ СЕЧЕНИЯ ==========
 case 'cable_pro':
     html = `
         <div class="calculator-description">
@@ -2275,13 +2275,13 @@ case 'cable_pro':
         
         <div class="form-group">
             <label><i class="fas fa-bolt"></i> Мощность нагрузки (Вт):</label>
-            <input type="number" id="cableProPower" placeholder="1000" step="10" min="10" value="1000">
+            <input type="number" id="cableProPower" placeholder="14000" step="10" min="10" value="14000">
             <small>Суммарная мощность всех приборов в линии</small>
         </div>
         
         <div class="form-group">
             <label><i class="fas fa-exchange-alt"></i> Или ток нагрузки (А):</label>
-            <input type="number" id="cableProCurrent" placeholder="" step="0.1" min="0.1">
+            <input type="number" id="cableProCurrent" placeholder="" step="0.1" min="0.1" value="66.99">
             <small>Оставьте пустым, если указали мощность</small>
         </div>
         
@@ -2309,15 +2309,38 @@ case 'cable_pro':
         <div class="input-group">
             <div class="form-group">
                 <label><i class="fas fa-ruler"></i> Длина линии (м):</label>
-                <input type="number" id="cableProLength" placeholder="50" step="1" min="1" value="50">
+                <input type="number" id="cableProLength" placeholder="40" step="1" min="1" value="40">
             </div>
             <div class="form-group">
                 <label><i class="fas fa-atom"></i> Материал жилы:</label>
                 <select id="cableProMaterial">
-                    <option value="copper">Медь (Cu)</option>
+                    <option value="copper" selected>Медь (Cu)</option>
                     <option value="aluminum">Алюминий (Al)</option>
                 </select>
             </div>
+        </div>
+        
+        <!-- ВЫБОР СЕЧЕНИЯ КАБЕЛЯ - ДОБАВЛЕНО -->
+        <div class="form-group">
+            <label><i class="fas fa-cable"></i> Выберите сечение кабеля (мм²):</label>
+            <select id="cableProSection" class="form-control">
+                <option value="1.5">1.5 мм²</option>
+                <option value="2.5">2.5 мм²</option>
+                <option value="4">4 мм²</option>
+                <option value="6">6 мм²</option>
+                <option value="10">10 мм²</option>
+                <option value="16">16 мм²</option>
+                <option value="25" selected>25 мм²</option>
+                <option value="35">35 мм²</option>
+                <option value="50">50 мм²</option>
+                <option value="70">70 мм²</option>
+                <option value="95">95 мм²</option>
+                <option value="120">120 мм²</option>
+                <option value="150">150 мм²</option>
+                <option value="185">185 мм²</option>
+                <option value="240">240 мм²</option>
+            </select>
+            <small>Выберите сечение кабеля для проверки</small>
         </div>
         
         <div class="form-group">
@@ -2328,7 +2351,7 @@ case 'cable_pro':
                 <option value="pipe2">Два одножильных в трубе</option>
                 <option value="pipe3">Три одножильных в трубе</option>
                 <option value="pipe4">Четыре одножильных в трубе</option>
-                <option value="pipe2c">Один двухжильный в трубе</option>
+                <option value="pipe2c" selected>Один двухжильный в трубе</option>
                 <option value="pipe3c">Один трёхжильный в трубе</option>
                 <option value="tray1">Короб, 1-4 кабеля</option>
                 <option value="tray2">Короб, 5-6 кабелей</option>
@@ -2408,7 +2431,7 @@ case 'cable_pro':
             </select>
         </div>
         
-        <!-- НОВАЯ КНОПКА ДЛЯ ОТКРЫТИЯ ТАБЛИЦЫ -->
+        <!-- КНОПКИ -->
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button type="button" class="extra-btn" onclick="calculateCableProDetailed()" style="flex: 2; background: #4caf50;">
                 <i class="fas fa-calculator"></i> Рассчитать
@@ -2418,6 +2441,27 @@ case 'cable_pro':
             </button>
         </div>
     `;
+    
+    // Инициализация зависимых полей
+    setTimeout(() => {
+        const voltageSelect = document.getElementById('cableProVoltage');
+        const phaseSelect = document.getElementById('cableProPhase');
+        
+        voltageSelect.addEventListener('change', function() {
+            const voltage = parseInt(this.value);
+            if (voltage === 380 || voltage === 400) {
+                phaseSelect.value = '3';
+            } else {
+                phaseSelect.value = '1';
+            }
+        });
+        
+        // Авторасчет тока при вводе мощности
+        document.getElementById('cableProPower').addEventListener('input', function() {
+            calculateProCurrent();
+        });
+    }, 100);
+    break;
     
     // Инициализация зависимых полей
     setTimeout(() => {
@@ -3470,228 +3514,232 @@ else recommendedCable = '70+ мм² (медь) или несколько лин�
             return calculateCableProDetailed();
         }
 
-        function calculateCableProDetailed() {
-            try {
-                // Получаем значения
-                const power = parseFloat(document.getElementById('cableProPower').value) || 0;
-                const currentInput = parseFloat(document.getElementById('cableProCurrent').value);
-                const voltage = parseInt(document.getElementById('cableProVoltage').value) || 220;
-                const phase = parseInt(document.getElementById('cableProPhase').value) || 1;
-                const length = parseFloat(document.getElementById('cableProLength').value) || 0;
-                const material = document.getElementById('cableProMaterial').value;
-                const method = document.getElementById('cableProMethod').value;
-                const maxLossPercent = parseFloat(document.getElementById('cableProLoss').value) || 5;
-                const cosPhi = parseFloat(document.getElementById('cableProCos').value) || 0.92;
-                const cableTemp = parseFloat(document.getElementById('cableProTemp').value) || 35;
-                const wiresCount = parseInt(document.getElementById('cableProWires').value) || 2;
-                const ambientTemp = parseFloat(document.getElementById('cableProAmbientTemp').value) || 25;
-                const powerMargin = parseFloat(document.getElementById('cableProMargin').value) || 15;
-                
-                // Проверка входных данных
-                if ((!power && !currentInput) || !length) {
-                    throw new Error('Введите мощность или ток и длину линии');
-                }
-                
-                if (length <= 0) {
-                    throw new Error('Длина линии должна быть больше 0');
-                }
-                
-                // Расчет тока с учетом фазности
-                let current;
-                if (currentInput) {
-                    current = currentInput;
-                } else {
-                    if (phase === 1) {
-                        // Однофазная сеть
-                        current = power / (voltage * cosPhi);
-                    } else {
-                        // Трехфазная сеть
-                        current = power / (Math.sqrt(3) * voltage * cosPhi);
-                    }
-                }
-                
-                // Добавляем запас по мощности
-                const currentWithMargin = current * (1 + powerMargin / 100);
-                
-                // Удельное сопротивление материалов
-                const resistivityBase = material === 'copper' ? 0.0175 : 0.028;
-                
-                // Коррекция сопротивления на температуру
-                const tempCoefficient = material === 'copper' ? 0.00403 : 0.00403;
-                const resistivity = resistivityBase * (1 + tempCoefficient * (cableTemp - 20));
-                
-                // Получаем таблицы допустимых токов
-                const currentTables = getProCurrentTables(material, method, ambientTemp, wiresCount);
-                
-                // 1. Расчет сечения по допустимому току (с запасом)
-                let sectionByCurrent = 0;
-                let maxCurrentForSection = 0;
-                
-                const sections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
-                
-                for (const section of sections) {
-                    const maxCurr = currentTables[section];
-                    if (maxCurr && maxCurr >= currentWithMargin) {
-                        sectionByCurrent = section;
-                        maxCurrentForSection = maxCurr;
-                        break;
-                    }
-                }
-                
-                if (!sectionByCurrent) {
-                    // Если не нашли подходящее сечение, берем максимальное
-                    sectionByCurrent = 240;
-                    maxCurrentForSection = currentTables[240] || 500;
-                }
-                
-                // 2. Расчет сечения по допустимому падению напряжения
-                const maxVoltageDrop = voltage * (maxLossPercent / 100);
-                let sectionByVoltage;
-                
-                if (phase === 1) {
-                    // Однофазная: ΔU = 2 * I * L * ρ / S
-                    sectionByVoltage = (2 * current * length * resistivity) / maxVoltageDrop;
-                } else {
-                    // Трехфазная: ΔU = √3 * I * L * ρ / S
-                    sectionByVoltage = (Math.sqrt(3) * current * length * resistivity) / maxVoltageDrop;
-                }
-                
-                // Округляем до ближайшего стандартного сечения
-                let sectionByVoltageStd = 0;
-                for (const section of sections) {
-                    if (section >= sectionByVoltage) {
-                        sectionByVoltageStd = section;
-                        break;
-                    }
-                }
-                
-                if (!sectionByVoltageStd) {
-                    sectionByVoltageStd = 240;
-                }
-                
-                // Выбираем большее сечение из двух критериев
-                const recommendedSection = Math.max(sectionByCurrent, sectionByVoltageStd);
-                
-                // Расчет фактического падения напряжения для выбранного сечения
-                let voltageDrop;
-                if (phase === 1) {
-                    voltageDrop = (2 * current * length * resistivity) / recommendedSection;
-                } else {
-                    voltageDrop = (Math.sqrt(3) * current * length * resistivity) / recommendedSection;
-                }
-                
-                const voltageDropPercent = (voltageDrop / voltage) * 100;
-                const endVoltage = voltage - voltageDrop;
-                
-                // Расчет сопротивления провода
-                let wireResistance;
-                if (phase === 1) {
-                    wireResistance = (2 * resistivity * length) / recommendedSection;
-                } else {
-                    wireResistance = resistivity * length / recommendedSection;
-                }
-                
-                // Расчет потерь мощности
-                const powerLoss = current * current * wireResistance;
-                const powerLossPercent = (powerLoss / (power || 1)) * 100;
-                
-                // Расчет максимальной мощности для выбранного сечения
-                let maxPower;
-                if (phase === 1) {
-                    maxPower = (maxCurrentForSection * voltage * cosPhi) / 1000;
-                } else {
-                    maxPower = (maxCurrentForSection * voltage * Math.sqrt(3) * cosPhi) / 1000;
-                }
-                
-                // Формируем результат
-                let html = `
-                    <div class="result-item success">
-                        <strong><i class="fas fa-check-circle"></i> Рекомендуемое сечение:</strong> ${recommendedSection} мм²
-                    </div>
-                    
-                    <div class="grid-x grid-margin-x" style="margin-top: 15px;">
-                        <div class="cell medium-6">
-                            <div class="result-item">
-                                <strong>Расчетный ток:</strong> ${current.toFixed(2)} А
-                                <br><small>С запасом ${powerMargin}%: ${currentWithMargin.toFixed(2)} А</small>
-                            </div>
-                            
-                            <div class="result-item">
-                                <strong>Напряжение сети:</strong> ${voltage}В (${phase === 1 ? '1 фаза' : '3 фазы'})
-                            </div>
-                            
-                            <div class="result-item">
-                                <strong>Материал кабеля:</strong> ${material === 'copper' ? 'Медь' : 'Алюминий'}
-                            </div>
-                            
-                            <div class="result-item">
-                                <strong>Длина линии:</strong> ${length} м
-                            </div>
-                        </div>
-                        
-                        <div class="cell medium-6">
-                            <div class="result-item">
-                                <strong>Макс. ток для кабеля:</strong> ${maxCurrentForSection} А
-                            </div>
-                            
-                            <div class="result-item">
-                                <strong>Макс. мощность:</strong> ${maxPower.toFixed(1)} кВт
-                            </div>
-                            
-                            <div class="result-item">
-                                <strong>Сопротивление:</strong> ${wireResistance.toFixed(4)} Ом
-                            </div>
-                            
-                            <div class="result-item">
-                                <strong>Потери мощности:</strong> ${powerLoss.toFixed(1)} Вт (${powerLossPercent.toFixed(2)}%)
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="result-item ${voltageDropPercent > 5 ? 'danger' : voltageDropPercent > 3 ? 'warning' : 'success'}" style="margin-top: 15px;">
-                        <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(2)} В (${voltageDropPercent.toFixed(2)}%)
-                        <br>
-                        <small>
-                            ${voltageDropPercent > 5 ? '⚠️ Превышение нормы ПУЭ (5%)!' : 
-                              voltageDropPercent > 3 ? '⚠️ Близко к пределу (рекомендуется <3%)' : 
-                              '✅ В пределах нормы (<3%)'}
-                        </small>
+// ОБНОВЛЕННАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ ВЫБРАННОГО СЕЧЕНИЯ
+function calculateCableProDetailed() {
+    try {
+        // Получаем значения
+        const power = parseFloat(document.getElementById('cableProPower').value) || 0;
+        const currentInput = parseFloat(document.getElementById('cableProCurrent').value);
+        const voltage = parseInt(document.getElementById('cableProVoltage').value) || 220;
+        const phase = parseInt(document.getElementById('cableProPhase').value) || 1;
+        const length = parseFloat(document.getElementById('cableProLength').value) || 0;
+        const material = document.getElementById('cableProMaterial').value;
+        const selectedSection = parseFloat(document.getElementById('cableProSection').value) || 25;
+        const method = document.getElementById('cableProMethod').value;
+        const maxLossPercent = parseFloat(document.getElementById('cableProLoss').value) || 5;
+        const cosPhi = parseFloat(document.getElementById('cableProCos').value) || 0.92;
+        const cableTemp = parseFloat(document.getElementById('cableProTemp').value) || 35;
+        const wiresCount = parseInt(document.getElementById('cableProWires').value) || 2;
+        const ambientTemp = parseFloat(document.getElementById('cableProAmbientTemp').value) || 25;
+        const powerMargin = parseFloat(document.getElementById('cableProMargin').value) || 15;
+        
+        // Проверка входных данных
+        if ((!power && !currentInput) || !length) {
+            throw new Error('Введите мощность или ток и длину линии');
+        }
+        
+        if (length <= 0) {
+            throw new Error('Длина линии должна быть больше 0');
+        }
+        
+        // Расчет тока с учетом фазности
+        let current;
+        if (currentInput) {
+            current = currentInput;
+        } else {
+            if (phase === 1) {
+                // Однофазная сеть
+                current = power / (voltage * cosPhi);
+            } else {
+                // Трехфазная сеть
+                current = power / (Math.sqrt(3) * voltage * cosPhi);
+            }
+        }
+        
+        // Добавляем запас по мощности
+        const currentWithMargin = current * (1 + powerMargin / 100);
+        
+        // Удельное сопротивление материалов
+        const resistivityBase = material === 'copper' ? 0.0175 : 0.028;
+        
+        // Коррекция сопротивления на температуру
+        const tempCoefficient = material === 'copper' ? 0.00403 : 0.00403;
+        const resistivity = resistivityBase * (1 + tempCoefficient * (cableTemp - 20));
+        
+        // Получаем таблицы допустимых токов
+        const currentTables = getProCurrentTables(material, method, ambientTemp, wiresCount);
+        
+        // Проверяем выбранное сечение
+        const maxCurrentForSelected = currentTables[selectedSection] || 0;
+        const isCurrentOk = currentWithMargin <= maxCurrentForSelected;
+        const currentLoadPercent = (current / maxCurrentForSelected) * 100;
+        
+        // Расчет падения напряжения для выбранного сечения
+        let voltageDrop;
+        if (phase === 1) {
+            voltageDrop = (2 * current * length * resistivity) / selectedSection;
+        } else {
+            voltageDrop = (Math.sqrt(3) * current * length * resistivity) / selectedSection;
+        }
+        
+        const voltageDropPercent = (voltageDrop / voltage) * 100;
+        const endVoltage = voltage - voltageDrop;
+        const isVoltageOk = voltageDropPercent <= maxLossPercent;
+        
+        // Расчет сопротивления провода
+        let wireResistance;
+        if (phase === 1) {
+            wireResistance = (2 * resistivity * length) / selectedSection;
+        } else {
+            wireResistance = resistivity * length / selectedSection;
+        }
+        
+        // Расчет потерь мощности
+        const powerLoss = current * current * wireResistance;
+        const powerLossPercent = (powerLoss / (power || 1)) * 100;
+        
+        // Расчет максимальной мощности для выбранного сечения
+        let maxPower;
+        if (phase === 1) {
+            maxPower = (maxCurrentForSelected * voltage * cosPhi) / 1000;
+        } else {
+            maxPower = (maxCurrentForSelected * voltage * Math.sqrt(3) * cosPhi) / 1000;
+        }
+        
+        // Рекомендуемое сечение по току
+        const sections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
+        let recommendedByCurrent = 0;
+        for (const section of sections) {
+            const maxCurr = currentTables[section];
+            if (maxCurr && maxCurr >= currentWithMargin) {
+                recommendedByCurrent = section;
+                break;
+            }
+        }
+        
+        // Рекомендуемое сечение по падению напряжения
+        let recommendedByVoltage;
+        if (phase === 1) {
+            recommendedByVoltage = (2 * current * length * resistivity) / (voltage * maxLossPercent / 100);
+        } else {
+            recommendedByVoltage = (Math.sqrt(3) * current * length * resistivity) / (voltage * maxLossPercent / 100);
+        }
+        
+        let recommendedByVoltageStd = 0;
+        for (const section of sections) {
+            if (section >= recommendedByVoltage) {
+                recommendedByVoltageStd = section;
+                break;
+            }
+        }
+        
+        const overallRecommended = Math.max(recommendedByCurrent, recommendedByVoltageStd);
+        
+        // Формируем результат
+        let html = `
+            <div class="result-item ${isCurrentOk && isVoltageOk ? 'success' : isCurrentOk || isVoltageOk ? 'warning' : 'danger'}">
+                <strong><i class="fas fa-check-circle"></i> Выбранное сечение:</strong> ${selectedSection} мм²
+            </div>
+            
+            <div class="grid-x grid-margin-x" style="margin-top: 15px;">
+                <div class="cell medium-6">
+                    <div class="result-item">
+                        <strong>Расчетный ток:</strong> ${current.toFixed(2)} А
+                        <br><small>С запасом ${powerMargin}%: ${currentWithMargin.toFixed(2)} А</small>
                     </div>
                     
                     <div class="result-item">
-                        <strong>Итоговое напряжение на нагрузке:</strong> ${endVoltage.toFixed(1)} В
-                        <br>
-                        <small>${endVoltage < voltage * 0.95 ? '⚠️ Напряжение ниже 95% от номинала' : '✅ Напряжение в норме'}</small>
+                        <strong>Напряжение сети:</strong> ${voltage}В (${phase === 1 ? '1 фаза' : '3 фазы'})
                     </div>
                     
-                    <div class="result-item info" style="margin-top: 15px;">
-                        <strong><i class="fas fa-info-circle"></i> Рекомендации:</strong>
-                        <ul style="margin-left: 20px; margin-top: 5px;">
-                            <li>Используйте кабель марки ${material === 'copper' ? 'ВВГ-нг(А)' : 'АВВГ'} сечением ${recommendedSection} мм²</li>
-                            <li>Способ прокладки: ${getProMethodName(method)}</li>
-                            ${voltageDropPercent > 3 ? `<li>Рекомендуется увеличить сечение до ${Math.ceil(recommendedSection * 1.5)} мм² для снижения потерь</li>` : ''}
-                            ${current > maxCurrentForSection * 0.9 ? `<li>⚠️ Ток близок к пределу! Рассмотрите сечение ${Math.ceil(recommendedSection * 1.5)} мм²</li>` : ''}
-                            ${length > 50 ? `<li>Для длины ${length}м рекомендуется проверять падение напряжения при подключении новой нагрузки</li>` : ''}
-                        </ul>
+                    <div class="result-item">
+                        <strong>Материал кабеля:</strong> ${material === 'copper' ? 'Медь' : 'Алюминий'}
                     </div>
                     
-                    <div class="result-item warning" style="margin-top: 15px;">
-                        <strong><i class="fas fa-exclamation-triangle"></i> Примечание:</strong>
-                        <p style="font-size: 0.8rem; margin-top: 5px;">
-                            Расчет выполнен по методике ПУЭ 7 с учетом всех параметров. 
-                            Для ответственных объектов рекомендуется дополнительная проверка расчетов.
-                            При температуре окружающей среды выше ${ambientTemp}°C допустимый ток снижается.
-                        </p>
+                    <div class="result-item">
+                        <strong>Длина линии:</strong> ${length} м
                     </div>
-                `;
+                </div>
                 
-                return html;
-                
-            } catch (error) {
-                return `<div class="result-item danger">Ошибка: ${error.message}</div>`;
-            }
+                <div class="cell medium-6">
+                    <div class="result-item ${currentLoadPercent > 100 ? 'danger' : currentLoadPercent > 90 ? 'warning' : 'success'}">
+                        <strong>Макс. ток для кабеля:</strong> ${maxCurrentForSelected} А
+                        <br><small>Загрузка: ${currentLoadPercent.toFixed(1)}%</small>
+                    </div>
+                    
+                    <div class="result-item">
+                        <strong>Макс. мощность:</strong> ${maxPower.toFixed(1)} кВт
+                    </div>
+                    
+                    <div class="result-item">
+                        <strong>Сопротивление:</strong> ${wireResistance.toFixed(4)} Ом
+                    </div>
+                    
+                    <div class="result-item">
+                        <strong>Потери мощности:</strong> ${powerLoss.toFixed(1)} Вт (${powerLossPercent.toFixed(2)}%)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-item ${voltageDropPercent > maxLossPercent ? 'danger' : voltageDropPercent > maxLossPercent * 0.8 ? 'warning' : 'success'}" style="margin-top: 15px;">
+                <strong>Падение напряжения:</strong> ${voltageDrop.toFixed(2)} В (${voltageDropPercent.toFixed(2)}%)
+                <br>
+                <small>
+                    ${voltageDropPercent > maxLossPercent ? '⚠️ Превышение допустимых потерь!' : 
+                      voltageDropPercent > maxLossPercent * 0.8 ? '⚠️ Близко к пределу' : 
+                      '✅ В пределах нормы'}
+                </small>
+            </div>
+            
+            <div class="result-item">
+                <strong>Итоговое напряжение на нагрузке:</strong> ${endVoltage.toFixed(1)} В
+            </div>
+        `;
+        
+        if (recommendedByCurrent > selectedSection || recommendedByVoltageStd > selectedSection) {
+            html += `
+                <div class="result-item warning" style="margin-top: 15px;">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Рекомендуется увеличить сечение!</strong><br>
+                    По току: ${recommendedByCurrent > selectedSection ? 'нужно ' + recommendedByCurrent + ' мм²' : 'ОК'}<br>
+                    По падению напряжения: ${recommendedByVoltageStd > selectedSection ? 'нужно ' + recommendedByVoltageStd + ' мм²' : 'ОК'}<br>
+                    <strong>Рекомендуемое сечение: ${overallRecommended} мм²</strong>
+                </div>
+            `;
+        } else if (recommendedByCurrent < selectedSection && recommendedByVoltageStd < selectedSection) {
+            html += `
+                <div class="result-item success" style="margin-top: 15px;">
+                    <strong><i class="fas fa-check-circle"></i> Сечение выбрано правильно</strong><br>
+                    Достаточно ${overallRecommended} мм²
+                </div>
+            `;
         }
-
+        
+        html += `
+            <div class="result-item info" style="margin-top: 15px;">
+                <strong><i class="fas fa-info-circle"></i> Детали расчета:</strong>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Способ прокладки: ${getProMethodName(method)}</li>
+                    <li>Температура жил: ${cableTemp}°C</li>
+                    <li>Температура среды: ${ambientTemp}°C</li>
+                    <li>Количество жил: ${wiresCount}</li>
+                </ul>
+            </div>
+            
+            <div class="result-item warning" style="margin-top: 15px;">
+                <strong><i class="fas fa-exclamation-triangle"></i> Примечание:</strong>
+                <p style="font-size: 0.8rem; margin-top: 5px;">
+                    Расчет выполнен по методике ПУЭ 7 с учетом всех параметров. 
+                    Для ответственных объектов рекомендуется дополнительная проверка расчетов.
+                </p>
+            </div>
+        `;
+        
+        return html;
+        
+    } catch (error) {
+        return `<div class="result-item danger">Ошибка: ${error.message}</div>`;
+    }
+}
         // Вспомогательные функции для PRO калькулятора
         function getProCurrentTables(material, method, ambientTemp, wiresCount) {
             // Базовые значения по ПУЭ для меди при 30°C (открытая прокладка)
